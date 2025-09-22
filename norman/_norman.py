@@ -1,9 +1,8 @@
-import base64
-import json
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from typing import Optional, Any
 
+import jwt
 from norman_core.clients.http_client import HttpClient
 from norman_core.services.authenticate import Authenticate
 from norman_objects.services.authenticate.login.account_id_password_login_request import AccountIDPasswordLoginRequest
@@ -59,20 +58,20 @@ class Norman:
             return True
 
         try:
-            _, payload, _ = self.__token.value().split('.')
-            payload += '=' * ((4 - len(payload) % 4) % 4)
-            decoded_payload = base64.urlsafe_b64decode(payload).decode('utf-8')
-            decoded = json.loads(decoded_payload)
-            now = datetime.now(timezone.utc).timestamp()
+            decoded = jwt.decode(
+                self.__token.value(),
+                options={"verify_signature": False}
+            )
+            exp = decoded["exp"]
 
-            exp = decoded.get("exp")
             extra_time_seconds = 300
-            if exp is None or exp < (now + extra_time_seconds):
+            now = datetime.now(timezone.utc).timestamp()
+            if exp < (now + extra_time_seconds):
                 return True
 
             return False
 
-        except (ValueError, AttributeError):
+        except (jwt.DecodeError, jwt.ExpiredSignatureError, KeyError):
             return True
 
     async def __login(self, http_client: HttpClient):

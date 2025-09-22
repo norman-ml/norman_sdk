@@ -6,6 +6,8 @@ readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
     "norman_core_sdk @ git+https://github.com/norman-ml/norman_core_sdk.git",
+
+    "pyjwt==2.10.1"
 ]
 
 [build-system]
