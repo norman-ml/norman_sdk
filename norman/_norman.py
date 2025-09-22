@@ -9,6 +9,7 @@ from norman_core.services.authenticate import Authenticate
 from norman_objects.services.authenticate.login.account_id_password_login_request import AccountIDPasswordLoginRequest
 from norman_objects.services.authenticate.login.api_key_login_request import ApiKeyLoginRequest
 from norman_objects.services.authenticate.login.email_password_login_request import EmailPasswordLoginRequest
+from norman_objects.services.authenticate.login.login_response import LoginResponse
 from norman_objects.services.authenticate.login.name_password_login_request import NamePasswordLoginRequest
 from norman_objects.services.authenticate.register.register_auth_factor_request import RegisterAuthFactorRequest
 from norman_objects.services.authenticate.signup.signup_password_request import SignupPasswordRequest
@@ -29,18 +30,19 @@ class Norman:
             password: Optional[str] = None,
             api_key: Optional[str] = None
         ):
+        if password is not None:
+            password = Sensitive(password)
+        if api_key is not None:
+            api_key = Sensitive(api_key)
+
         self.__account_id = account_id
         self.__username = username
         self.__email = email
-        self.__password = self.__wrap_sensitive(password)
-        self.__api_key = self.__wrap_sensitive(api_key)
+        self.__password = password
+        self.__api_key = api_key
 
         self.__token: Optional[Sensitive[str]] = None
         self.__account: Optional[Account] = None
-
-    @staticmethod
-    def __wrap_sensitive(sensitive: Optional[Any]):
-        return Sensitive(sensitive) if sensitive is not None else None
 
     @asynccontextmanager
     async def __get_http_client(self, login=True):
@@ -116,7 +118,7 @@ class Norman:
             api_key: str = await Authenticate.register.generate_api_key(http_client, self.__token, register_api_key_request)
             return api_key
 
-    async def create_user(self, username: str, password: str):
+    async def create_user(self, username: str, password: str) -> LoginResponse:
         async with self.__get_http_client(login=False) as http_client:
             signup_request = SignupPasswordRequest(name=username, password=password)
             login_response = await Authenticate.signup.signup_with_password(http_client, signup_request)
@@ -129,9 +131,15 @@ class Norman:
             email: str = None,
             password: Sensitive[str] = None,
             api_key: Sensitive[str] = None
-        ):
-        self.__account_id = account_id or self.__account_id
-        self.__username = username or self.__username
-        self.__email = email or self.__email
-        self.__password = self.__wrap_sensitive(password) or self.__password
-        self.__api_key = self.__wrap_sensitive(api_key) or self.__api_key
+        ) -> None:
+
+        if account_id is not None:
+            self.__account_id = account_id
+        if username is not None:
+            self.__username = username
+        if email is not None:
+            self.__email = email
+        if password is not None:
+            self.__password = Sensitive(password)
+        if api_key is not None:
+            self.__api_key = Sensitive(api_key)

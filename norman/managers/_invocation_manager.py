@@ -35,12 +35,20 @@ class InvocationManager:
 
         self._progress_tracker = progress_tracker
 
-    def _update_progress(self, stage: _InvocationStage, status: _InvocationStatus = "Starting", flags: Optional[list[StatusFlag]] = None):
+    def _update_progress(self, stage: _InvocationStage, status: _InvocationStatus = "Starting", flags: Optional[list[StatusFlag]] = None) -> None:
         if self._progress_tracker is not None:
+            invocation_id = ""
+            model_id  = ""
+            account_id = ""
+            if self.invocation is not None:
+                invocation_id = self.invocation.id
+                model_id = self.invocation.model_id
+                account_id = self.invocation.account_id
+
             event = InvocationEvent(
-                invocation_id=self.invocation.id if self.invocation else "",
-                model_id=self.invocation.model_id if self.invocation else "",
-                account_id=self.invocation.account_id if self.invocation else "",
+                invocation_id=invocation_id,
+                model_id=model_id,
+                account_id=account_id,
                 stage=stage,
                 status=status,
                 flags=flags,
@@ -104,7 +112,7 @@ class InvocationManager:
             task = self.get_output_results(output.id)
             output_tasks.append(task)
 
-        results: list[bytearray] = await asyncio.gather(*output_tasks)
+        results: list[bytes] = await asyncio.gather(*output_tasks)
         self._update_progress("Results", "Finished")
         self._update_progress("Invocation", "Finished")
         return {
