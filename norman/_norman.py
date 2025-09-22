@@ -6,8 +6,12 @@ from typing import Optional, Any
 
 from norman_core.clients.http_client import HttpClient
 from norman_core.services.authenticate import Authenticate
+from norman_objects.services.authenticate.login.account_id_password_login_request import AccountIDPasswordLoginRequest
 from norman_objects.services.authenticate.login.api_key_login_request import ApiKeyLoginRequest
+from norman_objects.services.authenticate.login.email_password_login_request import EmailPasswordLoginRequest
 from norman_objects.services.authenticate.login.name_password_login_request import NamePasswordLoginRequest
+from norman_objects.services.authenticate.register.register_auth_factor_request import RegisterAuthFactorRequest
+from norman_objects.services.authenticate.signup.signup_password_request import SignupPasswordRequest
 from norman_objects.shared.accounts.account import Account
 from norman_objects.shared.security.sensitive import Sensitive
 
@@ -17,34 +21,37 @@ from norman.norman_types import InvocationConfig
 
 
 class Norman:
-    def __init__(self, api_key: Optional[str] = None, username: Optional[str] = None, password: Optional[str] = None):
-        if api_key is None and (username is None or password is None):
-            raise ValueError("Either api_key or username and password must be provided")
-
-        if api_key is not None:
-            self.__api_key = Sensitive(api_key)
-        else:
-            self.__api_key = None
-        if password is not None:
-            self.__password = Sensitive(password)
-        else:
-            self.__password = None
-
+    def __init__(
+            self,
+            account_id: Optional[str] = None,
+            username: Optional[str] = None,
+            email: Optional[str] = None,
+            password: Optional[str] = None,
+            api_key: Optional[str] = None
+        ):
+        self.__account_id = account_id
         self.__username = username
+        self.__email = email
+        self.__password = self.__wrap_sensitive(password)
+        self.__api_key = self.__wrap_sensitive(api_key)
 
         self.__token: Optional[Sensitive[str]] = None
         self.__account: Optional[Account] = None
 
+    @staticmethod
+    def __wrap_sensitive(sensitive: Optional[Any]):
+        return Sensitive(sensitive) if sensitive is not None else None
+
     @asynccontextmanager
-    async def __get_http_client(self):
-        http_client = HttpClient()
-        if self.token_expired:
-            await self.__connect(http_client)
+    async def __get_http_client(self, login=True):
+        http_client = HttpClient("https://api.dev.avremy.public.norman-ai.com/v0")
+        if login and self.__token_expired:
+            await self.__login(http_client)
         yield http_client
         await http_client.close()
 
     @property
-    def token_expired(self) -> bool:
+    def __token_expired(self) -> bool:
         if self.__token is None:
             return True
 
@@ -65,13 +72,21 @@ class Norman:
         except (ValueError, AttributeError):
             return True
 
-    async def __connect(self, http_client: HttpClient):
-        if self.__api_key is not None:
-            login_request = ApiKeyLoginRequest(api_key=self.__api_key, account_id="why?")
+    async def __login(self, http_client: HttpClient):
+        if self.__account_id and self.__password:
+            login_request = AccountIDPasswordLoginRequest(account_id=self.__account_id, password=self.__password)
+            login_response = await Authenticate.login.login_password_account_id(http_client, login_request)
+        elif self.__account_id and self.__api_key:
+            login_request = ApiKeyLoginRequest(api_key=self.__api_key, account_id=self.__account_id)
             login_response = await Authenticate.login.login_with_key(http_client, login_request)
-        else:
+        elif self.__username and self.__password:
             login_request = NamePasswordLoginRequest(name=self.__username, password=self.__password)
             login_response = await Authenticate.login.login_password_name(http_client, login_request)
+        elif self.__email and self.__password:
+            login_request = EmailPasswordLoginRequest(email=self.__email, password=self.__password)
+            login_response = await Authenticate.login.login_password_email(http_client, login_request)
+        else:
+            raise ValueError("Invalid login combination provided")
 
         self.__token = login_response.access_token
         self.__account = login_response.account
@@ -92,3 +107,31 @@ class Norman:
             await upload_manager.upload_assets()
             await upload_manager.wait_for_flags()
             return upload_manager.model
+
+    async def generate_api_key(self):
+        async with self.__get_http_client() as http_client:
+            token = self.__token
+            await self.__login(http_client)
+            register_api_key_request = RegisterAuthFactorRequest(account_id=self.__account.id, second_token=token)
+            api_key: str = await Authenticate.register.generate_api_key(http_client, self.__token, register_api_key_request)
+            return api_key
+
+    async def create_user(self, username: str, password: str):
+        async with self.__get_http_client(login=False) as http_client:
+            signup_request = SignupPasswordRequest(name=username, password=password)
+            login_response = await Authenticate.signup.signup_with_password(http_client, signup_request)
+            return login_response
+
+    def update_auth_factors(
+            self,
+            account_id: str = None,
+            username: str = None,
+            email: str = None,
+            password: Sensitive[str] = None,
+            api_key: Sensitive[str] = None
+        ):
+        self.__account_id = account_id or self.__account_id
+        self.__username = username or self.__username
+        self.__email = email or self.__email
+        self.__password = self.__wrap_sensitive(password) or self.__password
+        self.__api_key = self.__wrap_sensitive(api_key) or self.__api_key
