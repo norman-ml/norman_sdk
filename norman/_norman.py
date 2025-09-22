@@ -17,8 +17,8 @@ from norman_objects.shared.accounts.account import Account
 from norman_objects.shared.models.model import Model
 from norman_objects.shared.security.sensitive import Sensitive
 
-from norman.managers._invocation_manager import InvocationManager, InvocationTracker
-from norman.managers._upload_manager import UploadManager, UploadTracker
+from norman._managers.invocation_manager import InvocationManager, InvocationTracker
+from norman._managers.upload_manager import UploadManager, UploadTracker
 from norman.objects.configs.invocation_config import InvocationConfig
 
 
