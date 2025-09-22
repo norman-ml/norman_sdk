@@ -1,11 +1,10 @@
 import asyncio
 from typing import Optional, Any
 
-from norman.managers._invocation_manager import InvocationTracker
-from norman.managers._upload_manager import UploadTracker
-
 from norman import Norman
 from norman.objects.configs.invocation_config import InvocationConfig
+from norman.objects.trackers.invocation_tracker import InvocationTracker
+from norman.objects.trackers.model_upload_tracker import UploadTracker
 
 
 class SyncNorman:

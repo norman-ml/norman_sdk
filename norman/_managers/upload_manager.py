@@ -4,7 +4,6 @@ import os
 from typing import Any, Optional
 
 import aiofiles
-from norman.helpers.model_from_config import ModelFromConfig
 from norman_core.clients.http_client import HttpClient
 from norman_core.clients.socket_client import SocketClient
 from norman_core.services.file_pull.file_pull import FilePull
@@ -19,7 +18,8 @@ from norman_objects.shared.security.sensitive import Sensitive
 from norman_objects.shared.status_flags.status_flag import StatusFlag
 from norman_objects.shared.status_flags.status_flag_value import StatusFlagValue
 
-from norman.objects.trackers.model_upload_tracker import UploadEvent, _UploadStage, _UploadStatus, UploadTracker
+from norman._helpers.model_from_config import ModelFromConfig
+from norman.objects.trackers.model_upload_tracker import UploadEvent, UploadStage, UploadStatus, UploadTracker
 
 
 class UploadManager:
@@ -46,7 +46,7 @@ class UploadManager:
         self._update_progress("Inputs_Upload", "Starting")
         tasks = []
         for model_asset in self.model.assets:
-            asset = next(asset for asset in self._assets if asset["name"] == model_asset.name)
+            asset = next(asset for asset in self._assets if asset["asset_name"] == model_asset.asset_name)
             asset_source = asset["source"]
             asset_data = asset["data"]
 
@@ -124,7 +124,7 @@ class UploadManager:
             return file_obj.getbuffer().nbytes
         raise ValueError("Unsupported file object or operation")
 
-    def _update_progress(self, stage: _UploadStage, status: _UploadStatus = "Starting", flags: Optional[list[StatusFlag]] = None):
+    def _update_progress(self, stage: UploadStage, status: UploadStatus = "Starting", flags: Optional[list[StatusFlag]] = None):
         if self._progress_tracker is not None:
             model_id = ""
             if self.model is not None:
