@@ -17,7 +17,7 @@ from norman_objects.shared.security.sensitive import Sensitive
 
 from norman.managers._invocation_manager import InvocationManager, InvocationTracker
 from norman.managers._upload_manager import UploadManager, UploadTracker
-from norman.norman_types import InvocationConfig
+from norman.objects.configs.invocation_config import InvocationConfig
 
 
 class Norman:

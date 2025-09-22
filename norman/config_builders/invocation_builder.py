@@ -1,6 +1,6 @@
 from typing import Literal, Any
 
-from norman.norman_types import InputSource, InvocationConfig
+from norman.objects.configs.invocation_config import InputSource, InvocationConfig
 
 
 class InvocationBuilder:

@@ -22,24 +22,9 @@ from norman_objects.shared.status_flags.status_flag import StatusFlag
 from norman_objects.shared.status_flags.status_flag_value import StatusFlagValue
 from norman_utils_external.streaming_utils import AsyncBufferedReader, BufferedReader
 
-from norman.norman_types import InvocationConfig
+from norman.objects.configs.invocation_config import InvocationConfig
+from norman.objects.trackers.invocation_tracker import InvocationTracker, _InvocationStage, _InvocationStatus, InvocationEvent
 
-_InvocationStage = Literal["Invocation", "Inputs_Upload", "Flags", "Results"]
-_InvocationStatus = Literal["Starting", "Finished", "Waiting"]
-
-@dataclass
-class InvocationEvent:
-    invocation_id: str
-    model_id: str
-    account_id: str
-    stage: _InvocationStage
-    status: _InvocationStatus
-
-    is_flag_event: bool = False
-    flags: Optional[list[StatusFlag]] = None
-
-
-InvocationTracker = Callable[[InvocationEvent], None]
 
 class InvocationManager:
     def __init__(self, http_client: HttpClient, token: Sensitive[str], invocation_config: InvocationConfig, progress_tracker: Optional[InvocationTracker] = None):

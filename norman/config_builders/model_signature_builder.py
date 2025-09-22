@@ -1,6 +1,6 @@
 from typing_extensions import Unpack
 
-from norman.norman_types import AdditionalSignatureFields
+from norman.objects.configs.additional_signature_fields import AdditionalSignatureFields
 
 
 class ModelSignatureBuilder:

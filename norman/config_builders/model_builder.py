@@ -2,7 +2,8 @@ from typing import Literal, Any
 
 from typing_extensions import Unpack
 
-from norman.norman_types import AdditionalModelFields, InputSource
+from norman.objects.configs.additional_model_fields import AdditionalModelFields
+from norman.objects.configs.invocation_config import InputSource
 
 
 class ModelBuilder:

@@ -30,20 +30,8 @@ from norman_objects.shared.security.sensitive import Sensitive
 from norman_objects.shared.status_flags.status_flag import StatusFlag
 from norman_objects.shared.status_flags.status_flag_value import StatusFlagValue
 
-_UploadStage = Literal["Model_Upload", "Inputs_Upload", "Flags"]
-_UploadStatus = Literal["Starting", "Finished", "Waiting"]
-@dataclass
-class UploadEvent:
-    model_id: str
-    account_id: str
-    stage: _UploadStage
-    status: _UploadStatus
+from norman.objects.trackers.model_upload_tracker import UploadEvent, _UploadStage, _UploadStatus, UploadTracker
 
-    is_flag_event: bool = False
-    flags: Optional[list[StatusFlag]] = None
-
-
-UploadTracker = Callable[[UploadEvent], None]
 
 class UploadManager:
     def __init__(self, http_client: HttpClient, token: Sensitive[str], account_id: str,  model_config: dict[str, Any], progress_tracker: Optional[UploadTracker] = None):

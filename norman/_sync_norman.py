@@ -4,7 +4,7 @@ from typing import Optional, Any
 from norman import Norman
 from norman.managers._invocation_manager import InvocationTracker
 from norman.managers._upload_manager import UploadTracker
-from norman.norman_types import InvocationConfig
+from norman.objects.configs.invocation_config import InvocationConfig
 
 
 class SyncNorman:
