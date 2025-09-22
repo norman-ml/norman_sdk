@@ -1,8 +1,7 @@
 import asyncio
 import io
-from dataclasses import dataclass
-from pathlib import Path
-from typing import Any, Union, Optional, Callable, Literal
+import os
+from typing import Any, Union, Optional
 
 import aiofiles
 from norman_core.clients.http_client import HttpClient
@@ -70,10 +69,12 @@ class InvocationManager:
             input_config = self.invocation_config["inputs"][input.display_title]
             input_source = input_config["source"]
             input_data = input_config["data"]
-            if input_source == "primitive":
+            if input_source == "Primitive":
                 _tasks.append(self._upload_primitive(input, input_data))
-            elif input_source == "file":
+            elif input_source == "Path":
                 _tasks.append(self._upload_file(input, input_data))
+            elif input_source == "Stream":
+                _tasks.append(self._upload_buffer(input, input_data))
             else:
                 _tasks.append(self._upload_link(input, input_data))
 
@@ -105,14 +106,14 @@ class InvocationManager:
             await asyncio.sleep(1)
         self._update_progress("Flags", "Finished")
 
-    async def get_results(self):
+    async def get_results(self) -> dict[str, bytearray]:
         self._update_progress("Results", "Starting")
         output_tasks = []
         for output in self.invocation.outputs:
             task = self.get_output_results(output.id)
             output_tasks.append(task)
 
-        results: list[bytes] = await asyncio.gather(*output_tasks)
+        results: list[bytearray] = await asyncio.gather(*output_tasks)
         self._update_progress("Results", "Finished")
         self._update_progress("Invocation", "Finished")
         return {
@@ -120,14 +121,14 @@ class InvocationManager:
             for output, result in zip(self.invocation.outputs, results)
         }
 
-    async def get_output_results(self, output_id: str):
+    async def get_output_results(self, output_id: str) -> bytearray:
         http_client = self.__http_client
         token = self.__token
         account_id = self.invocation.account_id
         model_id = self.invocation.model_id
         invocation_id = self.invocation.id
 
-        _, stream = await Retrieve.get_invocation_output(http_client, token, account_id, model_id, invocation_id, output_id)
+        headers, stream = await Retrieve.get_invocation_output(http_client, token, account_id, model_id, invocation_id, output_id)
 
         results = bytearray()
         async for chunk in stream:
@@ -140,20 +141,19 @@ class InvocationManager:
         buffer.write(str(data).encode("utf-8"))
         buffer.seek(0)
 
-        await self._upload_buffer(input, buffer, buffer.getbuffer().nbytes)
+        await self._upload_buffer(input, buffer)
 
     async def _upload_file(self, input: InvocationSignature, file_path: str):
-        size = Path(file_path).stat().st_size
         async with aiofiles.open(file_path, mode="rb") as file:
-            await self._upload_buffer(input, file, size)
+            await self._upload_buffer(input, file)
 
-    async def _upload_buffer(self, input: InvocationSignature, buffer: Union[AsyncBufferedReader, BufferedReader], size: int):
+    async def _upload_buffer(self, input: InvocationSignature, buffer: Union[AsyncBufferedReader, BufferedReader]):
         pairing_request = SocketInputPairingRequest(
             invocation_id=input.invocation_id,
             input_id=input.id,
             account_id=input.account_id,
             model_id=input.model_id,
-            file_size_in_bytes=size,
+            file_size_in_bytes=self._get_buffer_size(buffer),
         )
         request = await FilePush.allocate_socket_for_input(
             self.__http_client, self.__token, pairing_request
@@ -177,3 +177,11 @@ class InvocationManager:
         )
         response = await FilePull.submit_input_links(self.__http_client, self.__token, download_request)
         return response
+
+    @staticmethod
+    def _get_buffer_size(file_obj):
+        if hasattr(file_obj, "fileno"):
+            return os.fstat(file_obj.fileno()).st_size
+        if isinstance(file_obj, io.BytesIO):
+            return file_obj.getbuffer().nbytes
+        raise ValueError("Unsupported file object or operation")

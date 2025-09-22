@@ -1,6 +1,6 @@
 from typing import TypedDict, Any, Literal
 
-InputSource = Literal["File", "Primitive", "Link", "Path"]
+InputSource = Literal["Link", "Path", "Primitive", "Stream"]
 
 class ModelInput(TypedDict):
     source: InputSource

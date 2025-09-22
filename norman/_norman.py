@@ -14,6 +14,7 @@ from norman_objects.services.authenticate.login.name_password_login_request impo
 from norman_objects.services.authenticate.register.register_auth_factor_request import RegisterAuthFactorRequest
 from norman_objects.services.authenticate.signup.signup_password_request import SignupPasswordRequest
 from norman_objects.shared.accounts.account import Account
+from norman_objects.shared.models.model import Model
 from norman_objects.shared.security.sensitive import Sensitive
 
 from norman.managers._invocation_manager import InvocationManager, InvocationTracker
@@ -93,7 +94,7 @@ class Norman:
         self.__token = login_response.access_token
         self.__account = login_response.account
 
-    async def invoke(self, invocation_config: InvocationConfig, *, progress_tracker: Optional[InvocationTracker] = None):
+    async def invoke(self, invocation_config: InvocationConfig, *, progress_tracker: Optional[InvocationTracker] = None) -> dict[str, bytearray]:
         async with self.__get_http_client() as http_client:
             invocation_manager = InvocationManager(http_client, self.__token, invocation_config, progress_tracker)
             await invocation_manager.create_invocation()
@@ -102,7 +103,7 @@ class Norman:
             results = await invocation_manager.get_results()
             return results
 
-    async def upload_model(self, model_config: dict[str, Any], *, progress_tracker: Optional[UploadTracker] = None):
+    async def upload_model(self, model_config: dict[str, Any], *, progress_tracker: Optional[UploadTracker] = None) -> Model:
         async with self.__get_http_client() as http_client:
             upload_manager = UploadManager(http_client, self.__token, self.__account.id, model_config, progress_tracker=progress_tracker)
             await upload_manager.upload_model()
@@ -110,12 +111,12 @@ class Norman:
             await upload_manager.wait_for_flags()
             return upload_manager.model
 
-    async def generate_api_key(self):
+    async def generate_api_key(self) -> str:
         async with self.__get_http_client() as http_client:
             token = self.__token
             await self.__login(http_client)
             register_api_key_request = RegisterAuthFactorRequest(account_id=self.__account.id, second_token=token)
-            api_key: str = await Authenticate.register.generate_api_key(http_client, self.__token, register_api_key_request)
+            api_key = await Authenticate.register.generate_api_key(http_client, self.__token, register_api_key_request)
             return api_key
 
     async def create_user(self, username: str, password: str) -> LoginResponse:
@@ -131,7 +132,7 @@ class Norman:
             email: str = None,
             password: Sensitive[str] = None,
             api_key: Sensitive[str] = None
-        ) -> None:
+        ):
 
         if account_id is not None:
             self.__account_id = account_id
