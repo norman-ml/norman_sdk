@@ -1,8 +1,5 @@
 from typing import Literal, Any
 
-from typing_extensions import Unpack
-
-from norman.objects.configs.additional_model_fields import AdditionalModelFields
 from norman.objects.configs.invocation_config import InputSource
 
 
@@ -33,18 +30,37 @@ class ModelBuilder:
         self._outputs.append(model_signature)
         return self
 
-    def add_additional_fields(self, **kwargs: Unpack[AdditionalModelFields]) -> 'ModelBuilder':
-        self._additional_fields.update(kwargs)
+    def add_version_label(self, version_label: str) -> 'ModelBuilder':
+        self._additional_fields["version_label"] = version_label
         return self
 
-    def build(self):
-        config = {
+    def add_hosting_location(self, hosting_location: Literal["Internal", "External"]) -> 'ModelBuilder':
+        self._additional_fields["hosting_location"] = hosting_location
+        return self
+
+    def add_output_format(self, output_format: Literal["Json", "Binary", "Text"]) -> 'ModelBuilder':
+        self._additional_fields["output_format"] = output_format
+        return self
+
+    def add_request_type(self, request_type: Literal["Get", "Post", "Put"]) -> 'ModelBuilder':
+        self._additional_fields["request_type"] = request_type
+        return self
+
+    def add_http_headers(self, http_headers: dict[str, str]) -> 'ModelBuilder':
+        self._additional_fields["http_headers"] = http_headers
+        return self
+
+    def add_url(self, url: str) -> 'ModelBuilder':
+        self._additional_fields["url"] = url
+        return self
+
+    def build(self) -> dict[str, Any]:
+        return {
             "name": self._model_name,
             "short_description": self._short_description,
             "long_description": self._long_description,
             "assets": self._assets,
             "inputs": self._inputs,
-            "outputs": self._outputs
+            "outputs": self._outputs,
+            **self._additional_fields
         }
-        config.update(self._additional_fields)
-        return config

@@ -4,6 +4,7 @@ import os
 from typing import Any, Optional
 
 import aiofiles
+from norman.helpers.model_from_config import ModelFromConfig
 from norman_core.clients.http_client import HttpClient
 from norman_core.clients.socket_client import SocketClient
 from norman_core.services.file_pull.file_pull import FilePull
@@ -18,7 +19,6 @@ from norman_objects.shared.security.sensitive import Sensitive
 from norman_objects.shared.status_flags.status_flag import StatusFlag
 from norman_objects.shared.status_flags.status_flag_value import StatusFlagValue
 
-from norman.helpers.model_from_config import ModelFromConfig
 from norman.objects.trackers.model_upload_tracker import UploadEvent, _UploadStage, _UploadStatus, UploadTracker
 
 

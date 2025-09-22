@@ -1,4 +1,4 @@
-from typing import Literal, Any
+from typing import Any
 
 from norman.objects.configs.invocation_config import InputSource, InvocationConfig
 
@@ -8,7 +8,7 @@ class InvocationBuilder:
         self._model_name = model_name
         self._inputs = {}
 
-    def add_input(self, display_name: Literal["Logo", "File"], source: InputSource, data: Any) -> 'InvocationBuilder':
+    def add_input(self, display_name: str, source: InputSource, data: Any) -> 'InvocationBuilder':
         input = {
             "source": source,
             "data": data
@@ -17,8 +17,7 @@ class InvocationBuilder:
         return self
 
     def build(self) -> InvocationConfig:
-        config = {
+        return {
             "model_name": self._model_name,
             "inputs": self._inputs,
         }
-        return config
