@@ -15,8 +15,8 @@ from norman_objects.services.authenticate.signup.signup_password_request import 
 from norman_objects.shared.accounts.account import Account
 from norman_objects.shared.security.sensitive import Sensitive
 
-from norman._invocation_manager import InvocationManager, InvocationTracker
-from norman._upload_manager import UploadManager, UploadTracker
+from norman.managers._invocation_manager import InvocationManager, InvocationTracker
+from norman.managers._upload_manager import UploadManager, UploadTracker
 from norman.norman_types import InvocationConfig
 
 

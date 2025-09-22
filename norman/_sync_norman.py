@@ -2,8 +2,8 @@ import asyncio
 from typing import Optional, Any
 
 from norman import Norman
-from norman._invocation_manager import InvocationTracker
-from norman._upload_manager import UploadTracker
+from norman.managers._invocation_manager import InvocationTracker
+from norman.managers._upload_manager import UploadTracker
 from norman.norman_types import InvocationConfig
 
 
