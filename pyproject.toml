@@ -1,0 +1,20 @@
+[project]
+name = "norman-sdk"
+version = "0.1.0"
+description = "Norman SDK"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "norman_core_sdk @ git+https://github.com/norman-ml/norman_core_sdk.git",
+
+    "pyjwt==2.10.1"
+]
+
+[build-system]
+requires = ["setuptools>=80.9.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+]
