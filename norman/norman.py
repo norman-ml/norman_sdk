@@ -16,8 +16,9 @@ from norman_objects.shared.accounts.account import Account
 from norman_objects.shared.models.model import Model
 from norman_objects.shared.security.sensitive import Sensitive
 
-from norman._managers.invocation_manager import InvocationManager, InvocationTracker
-from norman._managers.upload_manager import UploadManager, UploadTracker
+from norman.helpers.model_factory import ModelFactory
+from norman.managers.invocation_manager import InvocationManager
+from norman.managers.model_upload_manager import ModelUploadManager
 from norman.objects.configs.invocation_config import InvocationConfig
 
 
@@ -46,7 +47,7 @@ class Norman:
 
     @asynccontextmanager
     async def __get_http_client(self, login=True):
-        http_client = HttpClient("https://api.dev.avremy.public.norman-ai.com/v0")
+        http_client = HttpClient()
         if login and self.__token_expired:
             await self.__login(http_client)
         yield http_client
@@ -93,22 +94,23 @@ class Norman:
         self.__token = login_response.access_token
         self.__account = login_response.account
 
-    async def invoke(self, invocation_config: InvocationConfig, *, progress_tracker: Optional[InvocationTracker] = None) -> dict[str, bytearray]:
+    async def invoke(self, invocation_config: InvocationConfig) -> dict[str, bytearray]:
         async with self.__get_http_client() as http_client:
-            invocation_manager = InvocationManager(http_client, self.__token, invocation_config, progress_tracker)
-            await invocation_manager.create_invocation()
-            await invocation_manager.upload_inputs()
-            await invocation_manager.wait_for_flags()
-            results = await invocation_manager.get_results()
+            invocation = await InvocationManager.create_invocation_in_database(http_client, self.__token, invocation_config)
+            await InvocationManager.upload_inputs(http_client, self.__token, invocation, invocation_config)
+            await InvocationManager.wait_for_flags(http_client, self.__token, invocation)
+            results = await InvocationManager.get_results(http_client, self.__token, invocation)
             return results
 
-    async def upload_model(self, model_config: dict[str, Any], *, progress_tracker: Optional[UploadTracker] = None) -> Model:
+    async def upload_model(self, model_config: dict[str, Any]) -> Model:
         async with self.__get_http_client() as http_client:
-            upload_manager = UploadManager(http_client, self.__token, self.__account.id, model_config, progress_tracker=progress_tracker)
-            await upload_manager.upload_model()
-            await upload_manager.upload_assets()
-            await upload_manager.wait_for_flags()
-            return upload_manager.model
+            model = ModelFactory.create_model(self.__account.id, model_config)
+
+            model = await ModelUploadManager.upload_model(http_client, self.__token, model)
+            await ModelUploadManager.upload_assets(http_client, self.__token, model, model_config["assets"])
+            await ModelUploadManager.wait_for_flags(http_client, self.__token, model)
+
+            return model
 
     async def generate_api_key(self) -> str:
         async with self.__get_http_client() as http_client:

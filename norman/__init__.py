@@ -1,4 +1,3 @@
-from norman._norman import Norman
-from norman._sync_norman import SyncNorman
+from norman.norman import Norman
 
-__all__ = ["Norman", "SyncNorman"]
+__all__ = ["Norman"]
