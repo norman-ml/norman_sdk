@@ -9,7 +9,7 @@ description = "Norman SDK"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
-    "norman_core_sdk @ git+https://github.com/norman-ml/norman_core_sdk_python.git@86c246m16/feature/sagemaker",
+    "norman_core_sdk @ git+https://github.com/norman-ml/norman_core_sdk_python.git",
 
     "pyjwt==2.10.1"
 ]

@@ -74,8 +74,6 @@ class ModelUploadManager:
             await self._handle_link_asset(token, model_asset, data)
         elif source == "HuggingFace":
             await self._handle_huggingface_asset(token, model_asset, data)
-        elif source == "Git":
-            await self._handle_git_asset(token, model_asset, data)
         else:
             raise ValueError(f"Invalid model asset source: {source}")
 
@@ -122,9 +120,6 @@ class ModelUploadManager:
             huggingface_model_id=data
         )
         await self._hug_service.download_huggingface_model(token, download_request)
-
-    async def _handle_git_asset(self, token: Sensitive[str], model_asset: ModelAsset, data: str) -> None:
-        pass
 
     async def _wait_for_flags(self, token: Sensitive[str], model: ModelProjection) -> None:
         entity_ids = [model.version.id]
