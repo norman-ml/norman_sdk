@@ -12,8 +12,7 @@ class AssetFactory(metaclass=Singleton):
     def create(asset_config: AssetConfig) -> ModelAsset:
         asset = ModelAsset(
             account_id=AssetFactory.authentication_manager.account_id,
-            asset_name=asset_config.asset_name,
-            asset_type=asset_config.asset_type
+            asset_name=asset_config.asset_name
         )
 
         return asset
