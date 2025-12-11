@@ -3,9 +3,11 @@ from typing import Any
 
 from norman_core.clients.http_client import HttpClient
 from norman_core.services.file_pull.file_pull import FilePull
+from norman_core.services.hug.hug import Hug
 from norman_core.services.persist import Persist
 from norman_objects.services.file_pull.requests.asset_download_request import AssetDownloadRequest
 from norman_objects.services.file_push.pairing.socket_asset_pairing_request import SocketAssetPairingRequest
+from norman_objects.services.hug.huggingface_download_request import HuggingFaceDownloadRequest
 from norman_objects.shared.models.model_asset import ModelAsset
 from norman_objects.shared.models.model_projection import ModelProjection
 from norman_objects.shared.security.sensitive import Sensitive
@@ -29,6 +31,7 @@ class ModelUploadManager:
         self._http_client = HttpClient()
 
         self._file_pull_service = FilePull()
+        self._hug_service = Hug()
         self._persist_service = Persist()
 
     async def upload_model(self, model_config: dict[str, Any]) -> ModelProjection:
@@ -69,6 +72,10 @@ class ModelUploadManager:
             await self._handle_stream_asset(token, model_asset, data)
         elif source == "Link":
             await self._handle_link_asset(token, model_asset, data)
+        elif source == "HuggingFace":
+            await self._handle_huggingface_asset(token, model_asset, data)
+        elif source == "Git":
+            await self._handle_git_asset(token, model_asset, data)
         else:
             raise ValueError(f"Invalid model asset source: {source}")
 
@@ -101,9 +108,22 @@ class ModelUploadManager:
             version_id=model_asset.version_id,
             asset_id=model_asset.id,
             asset_name=model_asset.asset_name,
-            links=[data],
+            links=[data]
         )
         await self._file_pull_service.submit_asset_links(token, download_request)
+
+    async def _handle_huggingface_asset(self, token: Sensitive[str], model_asset: ModelAsset, data: str) -> None:
+        download_request = HuggingFaceDownloadRequest(
+            account_id=model_asset.account_id,
+            model_id=model_asset.model_id,
+            asset_id=model_asset.id,
+            asset_name=model_asset.asset_name,
+            huggingface_model_id=data
+        )
+        await self._hug_service.download_huggingface_model(token, download_request)
+
+    async def _handle_git_asset(self, token: Sensitive[str], model_asset: ModelAsset, data: str) -> None:
+        pass
 
     async def _wait_for_flags(self, token: Sensitive[str], model: ModelProjection) -> None:
         entity_ids = [model.version.id]
