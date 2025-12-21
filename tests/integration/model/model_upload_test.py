@@ -81,7 +81,7 @@ class TestModelUpload:
         third_tag_config = ModelTagConfig(name="Test")
 
         model_config = ModelProjectionConfig(
-            name="VinciText SDK",
+            name=f"VinciText SDK {time_base64}",
             category="QA Model",
             version=version_config,
             user_tags=[first_tag_config, second_tag_config, third_tag_config]
