@@ -116,6 +116,7 @@ class ModelUploadManager:
         download_request = HuggingFaceDownloadRequest(
             account_id=model_asset.account_id,
             model_id=model_asset.model_id,
+            version_id=model_asset.version_id,
             asset_id=model_asset.id,
             asset_name=model_asset.asset_name,
             huggingface_model_id=data
