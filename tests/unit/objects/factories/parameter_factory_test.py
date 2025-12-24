@@ -62,7 +62,6 @@ class TestParameterFactoryCreate:
         assert result.version_id == "0"
         assert result.signature_id == "0"
 
-
     def test_create_with_unknown_encoding_raises_value_error(self):
         config = ParameterConfig(parameter_name="test_param", data_encoding="unknown_format")
 
@@ -94,4 +93,3 @@ class TestParameterFactoryCreate:
         config = ParameterConfig(parameter_name="test", data_encoding="WAV")
         result = ParameterFactory.create(config)
         assert result.data_encoding == "WAV"
-

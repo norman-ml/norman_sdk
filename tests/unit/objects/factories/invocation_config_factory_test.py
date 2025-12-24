@@ -51,8 +51,6 @@ class TestInvocationConfigFactoryCreate:
         assert result.inputs[0].display_title == "input1"
         assert result.inputs[1].display_title == "input2"
 
-    # --- Source Resolution ---
-
     def test_create_resolves_source_when_none(self):
         config_dict = {
             "model_name": "test-model",
