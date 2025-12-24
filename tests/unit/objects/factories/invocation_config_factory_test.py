@@ -9,279 +9,217 @@ from norman.objects.configs.invocation.invocation_config import InvocationConfig
 from norman.objects.factories.invocation_config_factory import InvocationConfigFactory
 
 
-class TestInvocationConfigFactoryCreate:
-    def test_create_returns_invocation_config_instance(self):
-        config_dict = {
-            "model_name": "test-model",
-            "inputs": [{"display_title": "input1", "data": "test data"}]
+INPUT_SOURCE_RESOLVER_PATH = "norman.objects.factories.invocation_config_factory.InputSourceResolver"
+
+
+@pytest.fixture
+def mock_input_source_resolver():
+    with patch(INPUT_SOURCE_RESOLVER_PATH) as mock:
+        mock.resolve.return_value = InputSource.Primitive
+        yield mock
+
+
+@pytest.fixture
+def minimal_invocation_dict() -> dict:
+    return {
+        "model_name": "text-classifier",
+        "inputs": [{"display_title": "text_input", "data": "sample text for classification"}]
+    }
+
+
+@pytest.mark.usefixtures("mock_input_source_resolver")
+class TestInvocationConfigFactory:
+    # --- Return Type and Basic Fields ---
+
+    def test_create_returns_invocation_config_instance(self, minimal_invocation_dict: dict) -> None:
+        created_config = InvocationConfigFactory.create(minimal_invocation_dict)
+
+        assert isinstance(created_config, InvocationConfig)
+
+    def test_create_sets_model_name_from_dict(self) -> None:
+        sentiment_model_dict = {
+            "model_name": "sentiment-analyzer",
+            "inputs": [{"display_title": "review_text", "data": "This product is amazing!"}]
         }
 
-        with patch('norman.objects.factories.invocation_config_factory.InputSourceResolver') as mock_resolver:
-            mock_resolver.resolve.return_value = InputSource.Primitive
-            result = InvocationConfigFactory.create(config_dict)
+        created_config = InvocationConfigFactory.create(sentiment_model_dict)
 
-        assert isinstance(result, InvocationConfig)
+        assert created_config.model_name == "sentiment-analyzer"
 
-    def test_create_sets_model_name(self):
-        config_dict = {
-            "model_name": "my-model",
-            "inputs": [{"display_title": "input1", "data": "test data"}]
-        }
-
-        with patch('norman.objects.factories.invocation_config_factory.InputSourceResolver') as mock_resolver:
-            mock_resolver.resolve.return_value = InputSource.Primitive
-            result = InvocationConfigFactory.create(config_dict)
-
-        assert result.model_name == "my-model"
-
-    def test_create_parses_inputs(self):
-        config_dict = {
-            "model_name": "test-model",
+    def test_create_parses_multiple_inputs(self) -> None:
+        multi_input_dict = {
+            "model_name": "image-captioner",
             "inputs": [
-                {"display_title": "input1", "data": "data1"},
-                {"display_title": "input2", "data": "data2"}
+                {"display_title": "image_data", "data": b"binary image data"},
+                {"display_title": "language_preference", "data": "english"}
             ]
         }
 
-        with patch('norman.objects.factories.invocation_config_factory.InputSourceResolver') as mock_resolver:
-            mock_resolver.resolve.return_value = InputSource.Primitive
-            result = InvocationConfigFactory.create(config_dict)
+        created_config = InvocationConfigFactory.create(multi_input_dict)
 
-        assert len(result.inputs) == 2
-        assert result.inputs[0].display_title == "input1"
-        assert result.inputs[1].display_title == "input2"
+        assert len(created_config.inputs) == 2
+        assert created_config.inputs[0].display_title == "image_data"
+        assert created_config.inputs[1].display_title == "language_preference"
 
-    def test_create_resolves_source_when_none(self):
-        config_dict = {
-            "model_name": "test-model",
-            "inputs": [{"display_title": "input1", "data": "test data", "source": None}]
+    def test_create_with_bytes_data(self) -> None:
+        binary_input_dict = {
+            "model_name": "audio-transcriber",
+            "inputs": [{"display_title": "audio_file", "data": b"\x00\x01\x02\x03"}]
         }
 
-        with patch('norman.objects.factories.invocation_config_factory.InputSourceResolver') as mock_resolver:
-            mock_resolver.resolve.return_value = InputSource.Primitive
-            result = InvocationConfigFactory.create(config_dict)
+        created_config = InvocationConfigFactory.create(binary_input_dict)
 
-        assert result.inputs[0].source == InputSource.Primitive
-        mock_resolver.resolve.assert_called_once_with("test data")
+        assert created_config.inputs[0].data == b"\x00\x01\x02\x03"
 
-    def test_create_resolves_source_when_not_provided(self):
-        config_dict = {
-            "model_name": "test-model",
-            "inputs": [{"display_title": "input1", "data": "test data"}]
+    def test_create_with_string_data(self) -> None:
+        text_input_dict = {
+            "model_name": "translation-model",
+            "inputs": [{"display_title": "source_text", "data": "Hello, world!"}]
         }
 
-        with patch('norman.objects.factories.invocation_config_factory.InputSourceResolver') as mock_resolver:
-            mock_resolver.resolve.return_value = InputSource.Link
-            result = InvocationConfigFactory.create(config_dict)
+        created_config = InvocationConfigFactory.create(text_input_dict)
 
-        assert result.inputs[0].source == InputSource.Link
-        mock_resolver.resolve.assert_called_once()
+        assert created_config.inputs[0].data == "Hello, world!"
 
-    def test_create_preserves_source_when_provided(self):
-        config_dict = {
-            "model_name": "test-model",
-            "inputs": [{"display_title": "input1", "data": "test data", "source": "File"}]
-        }
-
-        with patch('norman.objects.factories.invocation_config_factory.InputSourceResolver') as mock_resolver:
-            mock_resolver.resolve.return_value = InputSource.Primitive
-            result = InvocationConfigFactory.create(config_dict)
-
-        assert result.inputs[0].source == InputSource.File
-        mock_resolver.resolve.assert_not_called()
-
-    def test_create_resolves_each_input_independently(self):
-        config_dict = {
-            "model_name": "test-model",
-            "inputs": [
-                {"display_title": "input1", "data": "string data"},
-                {"display_title": "input2", "data": "https://example.com"},
-                {"display_title": "input3", "data": "more data", "source": "Stream"}
-            ]
-        }
-
-        with patch('norman.objects.factories.invocation_config_factory.InputSourceResolver') as mock_resolver:
-            mock_resolver.resolve.side_effect = [InputSource.Primitive, InputSource.Link]
-            result = InvocationConfigFactory.create(config_dict)
-
-        assert result.inputs[0].source == InputSource.Primitive
-        assert result.inputs[1].source == InputSource.Link
-        assert result.inputs[2].source == InputSource.Stream
-        assert mock_resolver.resolve.call_count == 2
-
-    def test_create_with_bytes_data(self):
-        config_dict = {
-            "model_name": "test-model",
-            "inputs": [{"display_title": "input1", "data": b"binary data"}]
-        }
-
-        with patch('norman.objects.factories.invocation_config_factory.InputSourceResolver') as mock_resolver:
-            mock_resolver.resolve.return_value = InputSource.Primitive
-            result = InvocationConfigFactory.create(config_dict)
-
-        assert result.inputs[0].data == b"binary data"
-        mock_resolver.resolve.assert_called_once_with(b"binary data")
-
-    def test_create_with_string_data(self):
-        config_dict = {
-            "model_name": "test-model",
-            "inputs": [{"display_title": "input1", "data": "string data"}]
-        }
-
-        with patch('norman.objects.factories.invocation_config_factory.InputSourceResolver') as mock_resolver:
-            mock_resolver.resolve.return_value = InputSource.Primitive
-            result = InvocationConfigFactory.create(config_dict)
-
-        assert result.inputs[0].data == "string data"
-
-    def test_create_with_no_outputs(self):
-        config_dict = {
-            "model_name": "test-model",
-            "inputs": [{"display_title": "input1", "data": "test data"}]
-        }
-
-        with patch('norman.objects.factories.invocation_config_factory.InputSourceResolver') as mock_resolver:
-            mock_resolver.resolve.return_value = InputSource.Primitive
-            result = InvocationConfigFactory.create(config_dict)
-
-        assert result.outputs is None
-
-    def test_create_with_outputs(self):
-        config_dict = {
-            "model_name": "test-model",
-            "inputs": [{"display_title": "input1", "data": "test data"}],
-            "outputs": [{"display_title": "output1", "data": "output data"}]
-        }
-
-        with patch('norman.objects.factories.invocation_config_factory.InputSourceResolver') as mock_resolver:
-            mock_resolver.resolve.return_value = InputSource.Primitive
-            result = InvocationConfigFactory.create(config_dict)
-
-        assert result.outputs is not None
-        assert len(result.outputs) == 1
-        assert result.outputs[0].display_title == "output1"
-
-    def test_create_with_missing_model_name_raises_validation_error(self):
-        config_dict = {
-            "inputs": [{"display_title": "input1", "data": "test data"}]
-        }
-
-        with pytest.raises(ValidationError):
-            InvocationConfigFactory.create(config_dict)
-
-    def test_create_with_missing_inputs_raises_validation_error(self):
-        config_dict = {
-            "model_name": "test-model"
-        }
-
-        with pytest.raises(ValidationError):
-            InvocationConfigFactory.create(config_dict)
-
-    def test_create_with_empty_inputs_list(self):
-        config_dict = {
-            "model_name": "test-model",
+    def test_create_with_empty_inputs_list(self) -> None:
+        empty_inputs_dict = {
+            "model_name": "no-input-model",
             "inputs": []
         }
 
-        result = InvocationConfigFactory.create(config_dict)
+        created_config = InvocationConfigFactory.create(empty_inputs_dict)
 
-        assert result.inputs == []
+        assert created_config.inputs == []
 
-    def test_create_with_invalid_input_raises_validation_error(self):
-        config_dict = {
-            "model_name": "test-model",
-            "inputs": [{"display_title": "input1"}]  # Missing 'data' field
+    # --- Outputs Handling ---
+
+    def test_create_with_no_outputs_defaults_to_none(self, minimal_invocation_dict: dict) -> None:
+        created_config = InvocationConfigFactory.create(minimal_invocation_dict)
+
+        assert created_config.outputs is None
+
+    def test_create_with_single_output(self) -> None:
+        single_output_dict = {
+            "model_name": "text-generator",
+            "inputs": [{"display_title": "prompt", "data": "Write a story about"}],
+            "outputs": [{"display_title": "generated_text", "data": "placeholder"}]
         }
 
-        with pytest.raises(ValidationError):
-            InvocationConfigFactory.create(config_dict)
+        created_config = InvocationConfigFactory.create(single_output_dict)
 
-    def test_create_with_none_data_raises_validation_error(self):
-        """None is not a valid data type - Pydantic rejects before resolver runs"""
-        config_dict = {
-            "model_name": "test-model",
-            "inputs": [{"display_title": "input1", "data": None}]
-        }
+        assert created_config.outputs is not None
+        assert len(created_config.outputs) == 1
+        assert created_config.outputs[0].display_title == "generated_text"
 
-        with pytest.raises(ValidationError):
-            InvocationConfigFactory.create(config_dict)
-
-    def test_create_propagates_resolver_value_error(self):
-        config_dict = {
-            "model_name": "test-model",
-            "inputs": [{"display_title": "input1", "data": "valid string data"}]
-        }
-
-        with patch('norman.objects.factories.invocation_config_factory.InputSourceResolver') as mock_resolver:
-            mock_resolver.resolve.side_effect = ValueError("Custom resolver error")
-
-            with pytest.raises(ValueError, match="Custom resolver error"):
-                InvocationConfigFactory.create(config_dict)
-
-    def test_create_propagates_resolver_file_not_found_error(self):
-        config_dict = {
-            "model_name": "test-model",
-            "inputs": [{"display_title": "input1", "data": "/nonexistent/path"}]
-        }
-
-        with patch('norman.objects.factories.invocation_config_factory.InputSourceResolver') as mock_resolver:
-            mock_resolver.resolve.side_effect = FileNotFoundError("No file exists at the specified location")
-
-            with pytest.raises(FileNotFoundError):
-                InvocationConfigFactory.create(config_dict)
-
-
-class TestInvocationConfigFactoryInputSourceResolution:
-    def test_resolver_called_with_correct_data(self):
-        config_dict = {
-            "model_name": "test-model",
-            "inputs": [
-                {"display_title": "input1", "data": "data-one"},
-                {"display_title": "input2", "data": "data-two"}
+    def test_create_with_multiple_outputs(self) -> None:
+        multi_output_dict = {
+            "model_name": "object-detector",
+            "inputs": [{"display_title": "image", "data": b"image bytes"}],
+            "outputs": [
+                {"display_title": "bounding_boxes", "data": "boxes placeholder"},
+                {"display_title": "class_labels", "data": "labels placeholder"}
             ]
         }
 
-        with patch('norman.objects.factories.invocation_config_factory.InputSourceResolver') as mock_resolver:
+        created_config = InvocationConfigFactory.create(multi_output_dict)
+
+        assert created_config.outputs is not None
+        assert len(created_config.outputs) == 2
+        assert created_config.outputs[0].display_title == "bounding_boxes"
+        assert created_config.outputs[1].display_title == "class_labels"
+
+    # --- Source Resolution Integration ---
+
+    def test_create_calls_resolver_when_source_not_provided(self) -> None:
+        no_source_dict = {
+            "model_name": "embedding-model",
+            "inputs": [{"display_title": "document", "data": "sample document text"}]
+        }
+
+        with patch(INPUT_SOURCE_RESOLVER_PATH) as mock_resolver:
             mock_resolver.resolve.return_value = InputSource.Primitive
-            InvocationConfigFactory.create(config_dict)
 
-            assert mock_resolver.resolve.call_count == 2
-            mock_resolver.resolve.assert_any_call("data-one")
-            mock_resolver.resolve.assert_any_call("data-two")
+            created_config = InvocationConfigFactory.create(no_source_dict)
 
-    def test_resolver_not_called_when_all_sources_provided(self):
-        config_dict = {
-            "model_name": "test-model",
-            "inputs": [
-                {"display_title": "input1", "data": "data1", "source": "File"},
-                {"display_title": "input2", "data": "data2", "source": "Link"}
-            ]
+            mock_resolver.resolve.assert_called_once_with("sample document text")
+            assert created_config.inputs[0].source == InputSource.Primitive
+
+    def test_create_does_not_call_resolver_when_source_provided(self) -> None:
+        explicit_source_dict = {
+            "model_name": "file-processor",
+            "inputs": [{"display_title": "input_file", "data": "/path/to/file.txt", "source": "File"}]
         }
 
-        with patch('norman.objects.factories.invocation_config_factory.InputSourceResolver') as mock_resolver:
-            InvocationConfigFactory.create(config_dict)
+        with patch(INPUT_SOURCE_RESOLVER_PATH) as mock_resolver:
+            created_config = InvocationConfigFactory.create(explicit_source_dict)
 
             mock_resolver.resolve.assert_not_called()
+            assert created_config.inputs[0].source == InputSource.File
 
-    def test_resolver_uses_return_value_for_each_input(self):
-        config_dict = {
-            "model_name": "test-model",
+    def test_create_calls_resolver_for_each_input_without_source(self) -> None:
+        mixed_source_dict = {
+            "model_name": "multi-modal-model",
             "inputs": [
-                {"display_title": "input1", "data": "primitive"},
-                {"display_title": "input2", "data": "https://example.com"},
-                {"display_title": "input3", "data": b"bytes"}
+                {"display_title": "text_input", "data": "plain text"},
+                {"display_title": "file_input", "data": "/data/file.bin", "source": "Stream"},
+                {"display_title": "url_input", "data": "https://api.example.com/data"}
             ]
         }
 
-        with patch('norman.objects.factories.invocation_config_factory.InputSourceResolver') as mock_resolver:
-            mock_resolver.resolve.side_effect = [
-                InputSource.Primitive,
-                InputSource.Link,
-                InputSource.Stream
-            ]
-            result = InvocationConfigFactory.create(config_dict)
+        with patch(INPUT_SOURCE_RESOLVER_PATH) as mock_resolver:
+            mock_resolver.resolve.side_effect = [InputSource.Primitive, InputSource.Link]
 
-        assert result.inputs[0].source == InputSource.Primitive
-        assert result.inputs[1].source == InputSource.Link
-        assert result.inputs[2].source == InputSource.Stream
-        
+            created_config = InvocationConfigFactory.create(mixed_source_dict)
+
+            assert mock_resolver.resolve.call_count == 2
+            assert created_config.inputs[0].source == InputSource.Primitive
+            assert created_config.inputs[1].source == InputSource.Stream
+            assert created_config.inputs[2].source == InputSource.Link
+
+    def test_create_propagates_resolver_error(self) -> None:
+        error_dict = {
+            "model_name": "error-model",
+            "inputs": [{"display_title": "problematic_input", "data": "data causing error"}]
+        }
+
+        with patch(INPUT_SOURCE_RESOLVER_PATH) as mock_resolver:
+            mock_resolver.resolve.side_effect = ValueError("Unable to resolve input source")
+
+            with pytest.raises(ValueError, match="Unable to resolve input source"):
+                InvocationConfigFactory.create(error_dict)
+
+    # --- Validation Errors ---
+
+    def test_create_with_missing_model_name_raises_validation_error(self) -> None:
+        missing_model_name_dict = {
+            "inputs": [{"display_title": "input", "data": "some data"}]
+        }
+
+        with pytest.raises(ValidationError):
+            InvocationConfigFactory.create(missing_model_name_dict)
+
+    def test_create_with_missing_inputs_raises_validation_error(self) -> None:
+        missing_inputs_dict = {
+            "model_name": "incomplete-model"
+        }
+
+        with pytest.raises(ValidationError):
+            InvocationConfigFactory.create(missing_inputs_dict)
+
+    def test_create_with_missing_input_data_raises_validation_error(self) -> None:
+        missing_data_dict = {
+            "model_name": "missing-data-model",
+            "inputs": [{"display_title": "incomplete_input"}]
+        }
+
+        with pytest.raises(ValidationError):
+            InvocationConfigFactory.create(missing_data_dict)
+
+    def test_create_with_none_data_raises_validation_error(self) -> None:
+        null_data_dict = {
+            "model_name": "null-data-model",
+            "inputs": [{"display_title": "null_input", "data": None}]
+        }
+
+        with pytest.raises(ValidationError):
+            InvocationConfigFactory.create(null_data_dict)
