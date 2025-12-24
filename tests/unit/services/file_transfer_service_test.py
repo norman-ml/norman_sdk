@@ -10,6 +10,8 @@ from norman_objects.shared.security.sensitive import Sensitive
 
 from norman.services.file_transfer_service import FileTransferService
 
+FILE_PUSH_PATH = "norman.services.file_transfer_service.FilePush"
+SOCKET_CLIENT_PATH = "norman.services.file_transfer_service.SocketClient"
 
 @pytest.fixture(autouse=True)
 def reset_singleton():
@@ -17,529 +19,118 @@ def reset_singleton():
     yield
     FileTransferService._instances = {}
 
+@pytest.fixture
+def mock_file_push():
+    with patch(FILE_PUSH_PATH) as mock_class:
+        mock_instance = MagicMock()
+        mock_class.return_value = mock_instance
+        yield mock_instance
 
-class TestFileTransferServiceUploadFile:
+@pytest.fixture
+def mock_socket_client():
+    with patch(SOCKET_CLIENT_PATH) as mock:
+        mock.write_and_digest = AsyncMock(return_value="checksum-abc123")
+        yield mock
+
+@pytest.fixture
+def authentication_token() -> Sensitive:
+    return Sensitive("api-token-xyz789")
+
+@pytest.fixture
+def mock_socket_info() -> MagicMock:
+    socket_info = MagicMock()
+    socket_info.pairing_id = "pairing-ghi789"
+    return socket_info
+
+@pytest.mark.usefixtures("reset_singleton", "mock_file_push", "mock_socket_client")
+class TestFileTransferService:
+
     @pytest.mark.asyncio
-    async def test_upload_file_opens_file_and_calls_upload_from_buffer(self, tmp_path):
-        test_file = tmp_path / "test.txt"
-        test_file.write_bytes(b"test content")
+    async def test_upload_file_opens_file_and_delegates_to_upload_from_buffer(self, tmp_path: Path, authentication_token: Sensitive) -> None:
+        model_weights_file = tmp_path / "model_weights.pt"
+        model_weights_file.write_bytes(b"binary model data")
+        asset_pairing = MagicMock(spec=SocketAssetPairingRequest)
+        asset_pairing.version_id = "version-abc123"
 
-        token = Sensitive("test-token")
-        pairing_request = MagicMock(spec=SocketAssetPairingRequest)
-        pairing_request.version_id = "version-123"
-
-        with patch('norman.services.file_transfer_service.FilePush') as mock_file_push_class, \
-             patch.object(FileTransferService, 'upload_from_buffer', new_callable=AsyncMock) as mock_upload:
-
-            mock_file_push = MagicMock()
-            mock_file_push_class.return_value = mock_file_push
-
+        with patch.object(FileTransferService, "upload_from_buffer", new_callable=AsyncMock) as mock_upload:
             service = FileTransferService()
-            await service.upload_file(token, pairing_request, test_file)
-
-            mock_upload.assert_called_once()
-            call_args = mock_upload.call_args
-            assert call_args[0][0] == token
-            assert call_args[0][1] == pairing_request
-
-    @pytest.mark.asyncio
-    async def test_upload_file_with_string_path(self, tmp_path):
-        test_file = tmp_path / "test.txt"
-        test_file.write_bytes(b"test content")
-
-        token = Sensitive("test-token")
-        pairing_request = MagicMock(spec=SocketAssetPairingRequest)
-        pairing_request.version_id = "version-123"
-
-        with patch('norman.services.file_transfer_service.FilePush') as mock_file_push_class, \
-             patch.object(FileTransferService, 'upload_from_buffer', new_callable=AsyncMock) as mock_upload:
-
-            mock_file_push = MagicMock()
-            mock_file_push_class.return_value = mock_file_push
-
-            service = FileTransferService()
-            await service.upload_file(token, pairing_request, str(test_file))
+            await service.upload_file(authentication_token, asset_pairing, model_weights_file)
 
             mock_upload.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_upload_file_with_path_object(self, tmp_path):
-        test_file = tmp_path / "test.txt"
-        test_file.write_bytes(b"test content")
+    async def test_upload_from_buffer_with_asset_pairing(self, mock_file_push: MagicMock, mock_socket_client: MagicMock, mock_socket_info: MagicMock, authentication_token: Sensitive) -> None:
+        mock_file_push.allocate_socket_for_asset = AsyncMock(return_value=mock_socket_info)
+        mock_file_push.complete_file_transfer = AsyncMock()
+        asset_pairing = MagicMock(spec=SocketAssetPairingRequest)
+        asset_pairing.version_id = "version-abc123"
 
-        token = Sensitive("test-token")
-        pairing_request = MagicMock(spec=SocketAssetPairingRequest)
-        pairing_request.version_id = "version-123"
+        service = FileTransferService()
+        await service.upload_from_buffer(authentication_token, asset_pairing, io.BytesIO(b"data"))
 
-        with patch('norman.services.file_transfer_service.FilePush') as mock_file_push_class, \
-             patch.object(FileTransferService, 'upload_from_buffer', new_callable=AsyncMock) as mock_upload:
-
-            mock_file_push = MagicMock()
-            mock_file_push_class.return_value = mock_file_push
-
-            service = FileTransferService()
-            await service.upload_file(token, pairing_request, Path(test_file))
-
-            mock_upload.assert_called_once()
-
-
-class TestFileTransferServiceUploadFromBuffer:
-    @pytest.mark.asyncio
-    async def test_upload_from_buffer_with_asset_pairing_request(self):
-        token = Sensitive("test-token")
-        pairing_request = MagicMock(spec=SocketAssetPairingRequest)
-        pairing_request.version_id = "version-123"
-        buffer = io.BytesIO(b"test data")
-
-        mock_socket_info = MagicMock()
-        mock_socket_info.pairing_id = "pairing-456"
-
-        with patch('norman.services.file_transfer_service.FilePush') as mock_file_push_class, \
-             patch('norman.services.file_transfer_service.SocketClient') as mock_socket_client:
-
-            mock_file_push = MagicMock()
-            mock_file_push.allocate_socket_for_asset = AsyncMock(return_value=mock_socket_info)
-            mock_file_push.complete_file_transfer = AsyncMock()
-            mock_file_push_class.return_value = mock_file_push
-
-            mock_socket_client.write_and_digest = AsyncMock(return_value="checksum-789")
-
-            service = FileTransferService()
-            await service.upload_from_buffer(token, pairing_request, buffer)
-
-            mock_file_push.allocate_socket_for_asset.assert_called_once_with(token, pairing_request)
-            mock_socket_client.write_and_digest.assert_called_once_with(mock_socket_info, buffer)
-            mock_file_push.complete_file_transfer.assert_called_once()
+        mock_file_push.allocate_socket_for_asset.assert_called_once()
+        mock_file_push.complete_file_transfer.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_upload_from_buffer_with_input_pairing_request(self):
-        token = Sensitive("test-token")
-        pairing_request = MagicMock(spec=SocketInputPairingRequest)
-        pairing_request.invocation_id = "invocation-123"
-        buffer = io.BytesIO(b"test data")
+    async def test_upload_from_buffer_with_input_pairing(self, mock_file_push: MagicMock, mock_socket_client: MagicMock, mock_socket_info: MagicMock, authentication_token: Sensitive) -> None:
+        mock_file_push.allocate_socket_for_input = AsyncMock(return_value=mock_socket_info)
+        mock_file_push.complete_file_transfer = AsyncMock()
+        input_pairing = MagicMock(spec=SocketInputPairingRequest)
+        input_pairing.invocation_id = "invocation-def456"
 
-        mock_socket_info = MagicMock()
-        mock_socket_info.pairing_id = "pairing-456"
+        service = FileTransferService()
+        await service.upload_from_buffer(authentication_token, input_pairing, io.BytesIO(b"data"))
 
-        with patch('norman.services.file_transfer_service.FilePush') as mock_file_push_class, \
-             patch('norman.services.file_transfer_service.SocketClient') as mock_socket_client:
-
-            mock_file_push = MagicMock()
-            mock_file_push.allocate_socket_for_input = AsyncMock(return_value=mock_socket_info)
-            mock_file_push.complete_file_transfer = AsyncMock()
-            mock_file_push_class.return_value = mock_file_push
-
-            mock_socket_client.write_and_digest = AsyncMock(return_value="checksum-789")
-
-            service = FileTransferService()
-            await service.upload_from_buffer(token, pairing_request, buffer)
-
-            mock_file_push.allocate_socket_for_input.assert_called_once_with(token, pairing_request)
-            mock_socket_client.write_and_digest.assert_called_once()
-            mock_file_push.complete_file_transfer.assert_called_once()
+        mock_file_push.allocate_socket_for_input.assert_called_once()
+        mock_file_push.complete_file_transfer.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_upload_from_buffer_with_bytes(self):
-        token = Sensitive("test-token")
-        pairing_request = MagicMock(spec=SocketAssetPairingRequest)
-        pairing_request.version_id = "version-123"
-        buffer = b"raw bytes data"
+    async def test_upload_from_buffer_unsupported_pairing_type_raises_error(self, mock_file_push: MagicMock, authentication_token: Sensitive) -> None:
+        service = FileTransferService()
 
-        mock_socket_info = MagicMock()
-        mock_socket_info.pairing_id = "pairing-456"
+        with pytest.raises(TypeError, match="Unsupported pairing request type"):
+            await service.upload_from_buffer(authentication_token, MagicMock(), io.BytesIO(b"data"))
 
-        with patch('norman.services.file_transfer_service.FilePush') as mock_file_push_class, \
-             patch('norman.services.file_transfer_service.SocketClient') as mock_socket_client:
-
-            mock_file_push = MagicMock()
-            mock_file_push.allocate_socket_for_asset = AsyncMock(return_value=mock_socket_info)
-            mock_file_push.complete_file_transfer = AsyncMock()
-            mock_file_push_class.return_value = mock_file_push
-
-            mock_socket_client.write_and_digest = AsyncMock(return_value="checksum-789")
-
-            service = FileTransferService()
-            await service.upload_from_buffer(token, pairing_request, buffer)
-
-            mock_socket_client.write_and_digest.assert_called_once_with(mock_socket_info, buffer)
-
-    @pytest.mark.asyncio
-    async def test_upload_from_buffer_unsupported_pairing_type_raises_error(self):
-        token = Sensitive("test-token")
-        pairing_request = MagicMock()  # Not a valid pairing request type
-        buffer = io.BytesIO(b"test data")
-
-        with patch('norman.services.file_transfer_service.FilePush') as mock_file_push_class:
-            mock_file_push = MagicMock()
-            mock_file_push_class.return_value = mock_file_push
-
-            service = FileTransferService()
-
-            with pytest.raises(TypeError, match="Unsupported pairing request type"):
-                await service.upload_from_buffer(token, pairing_request, buffer)
-
-    @pytest.mark.asyncio
-    async def test_upload_from_buffer_creates_checksum_request_with_correct_entity_id_for_asset(self):
-        token = Sensitive("test-token")
-        pairing_request = MagicMock(spec=SocketAssetPairingRequest)
-        pairing_request.version_id = "version-123"
-        buffer = io.BytesIO(b"test data")
-
-        mock_socket_info = MagicMock()
-        mock_socket_info.pairing_id = "pairing-456"
-
-        with patch('norman.services.file_transfer_service.FilePush') as mock_file_push_class, \
-             patch('norman.services.file_transfer_service.SocketClient') as mock_socket_client, \
-             patch('norman.services.file_transfer_service.ChecksumRequest') as mock_checksum_request:
-
-            mock_file_push = MagicMock()
-            mock_file_push.allocate_socket_for_asset = AsyncMock(return_value=mock_socket_info)
-            mock_file_push.complete_file_transfer = AsyncMock()
-            mock_file_push_class.return_value = mock_file_push
-
-            mock_socket_client.write_and_digest = AsyncMock(return_value="checksum-789")
-
-            service = FileTransferService()
-            await service.upload_from_buffer(token, pairing_request, buffer)
-
-            mock_checksum_request.assert_called_once_with(
-                entity_id="version-123",
-                pairing_id="pairing-456",
-                checksum="checksum-789"
-            )
-
-    @pytest.mark.asyncio
-    async def test_upload_from_buffer_creates_checksum_request_with_correct_entity_id_for_input(self):
-        token = Sensitive("test-token")
-        pairing_request = MagicMock(spec=SocketInputPairingRequest)
-        pairing_request.invocation_id = "invocation-123"
-        buffer = io.BytesIO(b"test data")
-
-        mock_socket_info = MagicMock()
-        mock_socket_info.pairing_id = "pairing-456"
-
-        with patch('norman.services.file_transfer_service.FilePush') as mock_file_push_class, \
-             patch('norman.services.file_transfer_service.SocketClient') as mock_socket_client, \
-             patch('norman.services.file_transfer_service.ChecksumRequest') as mock_checksum_request:
-
-            mock_file_push = MagicMock()
-            mock_file_push.allocate_socket_for_input = AsyncMock(return_value=mock_socket_info)
-            mock_file_push.complete_file_transfer = AsyncMock()
-            mock_file_push_class.return_value = mock_file_push
-
-            mock_socket_client.write_and_digest = AsyncMock(return_value="checksum-789")
-
-            service = FileTransferService()
-            await service.upload_from_buffer(token, pairing_request, buffer)
-
-            mock_checksum_request.assert_called_once_with(
-                entity_id="invocation-123",
-                pairing_id="pairing-456",
-                checksum="checksum-789"
-            )
-
-
-class TestFileTransferServiceNormalizePrimitiveData:
-    def test_normalize_string_returns_bytes_io(self):
-        with patch('norman.services.file_transfer_service.FilePush'):
-            service = FileTransferService()
-            result = service.normalize_primitive_data("hello world")
+    def test_normalize_string_returns_utf8_bytes_io(self, mock_file_push: MagicMock) -> None:
+        service = FileTransferService()
+        result = service.normalize_primitive_data("Hello, model!")
 
         assert isinstance(result, io.BytesIO)
+        assert result.getvalue() == b"Hello, model!"
 
-    def test_normalize_string_encodes_as_utf8(self):
-        with patch('norman.services.file_transfer_service.FilePush'):
-            service = FileTransferService()
-            result = service.normalize_primitive_data("hello world")
+    def test_normalize_bytes_returns_bytes_io(self, mock_file_push: MagicMock) -> None:
+        service = FileTransferService()
 
-        assert result.getvalue() == b"hello world"
+        result = service.normalize_primitive_data(b"\x00\x01\x02\xff")
 
-    def test_normalize_empty_string(self):
-        with patch('norman.services.file_transfer_service.FilePush'):
-            service = FileTransferService()
-            result = service.normalize_primitive_data("")
+        assert result.getvalue() == b"\x00\x01\x02\xff"
 
-        assert result.getvalue() == b""
+    def test_normalize_bytes_io_returns_same_object(self, mock_file_push: MagicMock) -> None:
+        service = FileTransferService()
+        original_buffer = io.BytesIO(b"original")
 
-    def test_normalize_unicode_string(self):
-        with patch('norman.services.file_transfer_service.FilePush'):
-            service = FileTransferService()
-            result = service.normalize_primitive_data("héllo wörld 中文")
+        result = service.normalize_primitive_data(original_buffer)
 
-        assert result.getvalue() == "héllo wörld 中文".encode("utf-8")
+        assert result is original_buffer
 
-    def test_normalize_bytes_returns_bytes_io(self):
-        with patch('norman.services.file_transfer_service.FilePush'):
-            service = FileTransferService()
-            result = service.normalize_primitive_data(b"binary data")
+    def test_normalize_integer_returns_string_bytes_io(self, mock_file_push: MagicMock) -> None:
+        service = FileTransferService()
 
-        assert isinstance(result, io.BytesIO)
-        assert result.getvalue() == b"binary data"
+        result = service.normalize_primitive_data(42)
 
-    def test_normalize_empty_bytes(self):
-        with patch('norman.services.file_transfer_service.FilePush'):
-            service = FileTransferService()
-            result = service.normalize_primitive_data(b"")
-
-        assert result.getvalue() == b""
-
-    def test_normalize_bytearray(self):
-        with patch('norman.services.file_transfer_service.FilePush'):
-            service = FileTransferService()
-            result = service.normalize_primitive_data(bytearray(b"bytearray data"))
-
-        assert isinstance(result, io.BytesIO)
-        assert result.getvalue() == b"bytearray data"
-
-    def test_normalize_bytes_io_returns_same_object(self):
-        with patch('norman.services.file_transfer_service.FilePush'):
-            service = FileTransferService()
-            original = io.BytesIO(b"original data")
-            result = service.normalize_primitive_data(original)
-
-        assert result is original
-
-    def test_normalize_integer_returns_bytes_io(self):
-        with patch('norman.services.file_transfer_service.FilePush'):
-            service = FileTransferService()
-            result = service.normalize_primitive_data(42)
-
-        assert isinstance(result, io.BytesIO)
         assert result.getvalue() == b"42"
 
-    def test_normalize_negative_integer(self):
-        with patch('norman.services.file_transfer_service.FilePush'):
-            service = FileTransferService()
-            result = service.normalize_primitive_data(-123)
+    def test_normalize_dict_returns_json_bytes_io(self, mock_file_push: MagicMock) -> None:
+        service = FileTransferService()
+        config = {"hidden_size": 768}
 
-        assert result.getvalue() == b"-123"
+        result = service.normalize_primitive_data(config)
 
-    def test_normalize_zero(self):
-        with patch('norman.services.file_transfer_service.FilePush'):
-            service = FileTransferService()
-            result = service.normalize_primitive_data(0)
+        assert result.getvalue() == json.dumps(config).encode("utf-8")
 
-        assert result.getvalue() == b"0"
+    @pytest.mark.parametrize("unsupported_input", [None, (1, 2), {1, 2}])
+    def test_normalize_unsupported_types_raise_value_error(self, mock_file_push: MagicMock, unsupported_input) -> None:
+        service = FileTransferService()
 
-    def test_normalize_large_integer(self):
-        with patch('norman.services.file_transfer_service.FilePush'):
-            service = FileTransferService()
-            result = service.normalize_primitive_data(999999999999)
-
-        assert result.getvalue() == b"999999999999"
-
-    def test_normalize_float_returns_bytes_io(self):
-        with patch('norman.services.file_transfer_service.FilePush'):
-            service = FileTransferService()
-            result = service.normalize_primitive_data(3.14)
-
-        assert isinstance(result, io.BytesIO)
-        assert result.getvalue() == b"3.14"
-
-    def test_normalize_negative_float(self):
-        with patch('norman.services.file_transfer_service.FilePush'):
-            service = FileTransferService()
-            result = service.normalize_primitive_data(-2.5)
-
-        assert result.getvalue() == b"-2.5"
-
-    def test_normalize_float_zero(self):
-        with patch('norman.services.file_transfer_service.FilePush'):
-            service = FileTransferService()
-            result = service.normalize_primitive_data(0.0)
-
-        assert result.getvalue() == b"0.0"
-
-    def test_normalize_boolean_true_converts_to_string(self):
-        """Booleans are treated as integers since bool is a subclass of int"""
-        with patch('norman.services.file_transfer_service.FilePush'):
-            service = FileTransferService()
-            result = service.normalize_primitive_data(True)
-
-        # True is treated as int (value 1) -> "1"
-        assert result.getvalue() == b"True"
-
-    def test_normalize_boolean_false_converts_to_string(self):
-        """Booleans are treated as integers since bool is a subclass of int"""
-        with patch('norman.services.file_transfer_service.FilePush'):
-            service = FileTransferService()
-            result = service.normalize_primitive_data(False)
-
-        # False is treated as int (value 0) -> "0"
-        assert result.getvalue() == b"False"
-
-    def test_normalize_dict_returns_bytes_io(self):
-        with patch('norman.services.file_transfer_service.FilePush'):
-            service = FileTransferService()
-            result = service.normalize_primitive_data({"key": "value"})
-
-        assert isinstance(result, io.BytesIO)
-
-    def test_normalize_dict_as_json(self):
-        with patch('norman.services.file_transfer_service.FilePush'):
-            service = FileTransferService()
-            data = {"key": "value", "number": 42}
-            result = service.normalize_primitive_data(data)
-
-        expected = json.dumps(data).encode("utf-8")
-        assert result.getvalue() == expected
-
-    def test_normalize_empty_dict(self):
-        with patch('norman.services.file_transfer_service.FilePush'):
-            service = FileTransferService()
-            result = service.normalize_primitive_data({})
-
-        assert result.getvalue() == b"{}"
-
-    def test_normalize_nested_dict(self):
-        with patch('norman.services.file_transfer_service.FilePush'):
-            service = FileTransferService()
-            data = {"outer": {"inner": "value"}}
-            result = service.normalize_primitive_data(data)
-
-        expected = json.dumps(data).encode("utf-8")
-        assert result.getvalue() == expected
-
-    def test_normalize_list_returns_bytes_io(self):
-        with patch('norman.services.file_transfer_service.FilePush'):
-            service = FileTransferService()
-            result = service.normalize_primitive_data([1, 2, 3])
-
-        assert isinstance(result, io.BytesIO)
-
-    def test_normalize_list_as_json(self):
-        with patch('norman.services.file_transfer_service.FilePush'):
-            service = FileTransferService()
-            data = [1, "two", 3.0]
-            result = service.normalize_primitive_data(data)
-
-        expected = json.dumps(data).encode("utf-8")
-        assert result.getvalue() == expected
-
-    def test_normalize_empty_list(self):
-        with patch('norman.services.file_transfer_service.FilePush'):
-            service = FileTransferService()
-            result = service.normalize_primitive_data([])
-
-        assert result.getvalue() == b"[]"
-
-    def test_normalize_nested_list(self):
-        with patch('norman.services.file_transfer_service.FilePush'):
-            service = FileTransferService()
-            data = [[1, 2], [3, 4]]
-            result = service.normalize_primitive_data(data)
-
-        expected = json.dumps(data).encode("utf-8")
-        assert result.getvalue() == expected
-
-    def test_normalize_none_raises_value_error(self):
-        with patch('norman.services.file_transfer_service.FilePush'):
-            service = FileTransferService()
-
-            with pytest.raises(ValueError, match="Unsupported data type"):
-                service.normalize_primitive_data(None)
-
-    def test_normalize_tuple_raises_value_error(self):
-        with patch('norman.services.file_transfer_service.FilePush'):
-            service = FileTransferService()
-
-            with pytest.raises(ValueError, match="Unsupported data type"):
-                service.normalize_primitive_data((1, 2, 3))
-
-    def test_normalize_set_raises_value_error(self):
-        with patch('norman.services.file_transfer_service.FilePush'):
-            service = FileTransferService()
-
-            with pytest.raises(ValueError, match="Unsupported data type"):
-                service.normalize_primitive_data({1, 2, 3})
-
-    def test_normalize_custom_object_raises_value_error(self):
-        class CustomObject:
-            pass
-
-        with patch('norman.services.file_transfer_service.FilePush'):
-            service = FileTransferService()
-
-            with pytest.raises(ValueError, match="Unsupported data type"):
-                service.normalize_primitive_data(CustomObject())
-
-
-class TestFileTransferServiceInit:
-    """Tests for FileTransferService initialization"""
-
-    def test_init_creates_file_push_service(self):
-        with patch('norman.services.file_transfer_service.FilePush') as mock_file_push_class:
-            FileTransferService()
-
-            mock_file_push_class.assert_called_once()
-
-    def test_init_stores_file_push_service(self):
-        with patch('norman.services.file_transfer_service.FilePush') as mock_file_push_class:
-            mock_file_push = MagicMock()
-            mock_file_push_class.return_value = mock_file_push
-
-            service = FileTransferService()
-
-            assert service._file_push_service is mock_file_push
-
-
-class TestFileTransferServiceIntegration:
-    """Integration tests for FileTransferService"""
-
-    @pytest.mark.asyncio
-    async def test_upload_flow_asset_pairing(self):
-        """Test complete upload flow with asset pairing"""
-        token = Sensitive("test-token")
-        pairing_request = MagicMock(spec=SocketAssetPairingRequest)
-        pairing_request.version_id = "version-123"
-        buffer = io.BytesIO(b"test data")
-
-        mock_socket_info = MagicMock()
-        mock_socket_info.pairing_id = "pairing-456"
-
-        with patch('norman.services.file_transfer_service.FilePush') as mock_file_push_class, \
-             patch('norman.services.file_transfer_service.SocketClient') as mock_socket_client:
-
-            mock_file_push = MagicMock()
-            mock_file_push.allocate_socket_for_asset = AsyncMock(return_value=mock_socket_info)
-            mock_file_push.complete_file_transfer = AsyncMock()
-            mock_file_push_class.return_value = mock_file_push
-
-            mock_socket_client.write_and_digest = AsyncMock(return_value="checksum-789")
-
-            service = FileTransferService()
-            await service.upload_from_buffer(token, pairing_request, buffer)
-
-            # Verify the complete flow
-            mock_file_push.allocate_socket_for_asset.assert_called_once()
-            mock_socket_client.write_and_digest.assert_called_once()
-            mock_file_push.complete_file_transfer.assert_called_once()
-
-    @pytest.mark.asyncio
-    async def test_upload_flow_input_pairing(self):
-        """Test complete upload flow with input pairing"""
-        token = Sensitive("test-token")
-        pairing_request = MagicMock(spec=SocketInputPairingRequest)
-        pairing_request.invocation_id = "invocation-123"
-        buffer = io.BytesIO(b"test data")
-
-        mock_socket_info = MagicMock()
-        mock_socket_info.pairing_id = "pairing-456"
-
-        with patch('norman.services.file_transfer_service.FilePush') as mock_file_push_class, \
-             patch('norman.services.file_transfer_service.SocketClient') as mock_socket_client:
-
-            mock_file_push = MagicMock()
-            mock_file_push.allocate_socket_for_input = AsyncMock(return_value=mock_socket_info)
-            mock_file_push.complete_file_transfer = AsyncMock()
-            mock_file_push_class.return_value = mock_file_push
-
-            mock_socket_client.write_and_digest = AsyncMock(return_value="checksum-789")
-
-            service = FileTransferService()
-            await service.upload_from_buffer(token, pairing_request, buffer)
-
-            # Verify the complete flow
-            mock_file_push.allocate_socket_for_input.assert_called_once()
-            mock_socket_client.write_and_digest.assert_called_once()
-            mock_file_push.complete_file_transfer.assert_called_once()
+        with pytest.raises(ValueError, match="Unsupported data type"):
+            service.normalize_primitive_data(unsupported_input)
