@@ -13,7 +13,6 @@ class AssetFactory(metaclass=Singleton):
         asset = ModelAsset(
             account_id=AssetFactory.authentication_manager.account_id,
             asset_name=asset_config.asset_name,
-            asset_type=asset_config.asset_type
         )
 
         return asset
