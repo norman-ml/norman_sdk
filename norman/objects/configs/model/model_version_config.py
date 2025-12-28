@@ -19,8 +19,9 @@ class ModelVersionConfig(BaseModel):
     inputs: List[SignatureConfig] = Field(description="Input signatures defining model inputs and their formats")
     outputs: List[SignatureConfig] = Field(description="Output signatures defining model outputs and their formats")
 
-    cuda_version: Optional[str] = Field(default="11.8.0", description="")
-    python_version: Optional[str] = Field(default="3.10", description="")
+    cuda_version: str = Field(default="11.8.0", description="Cuda version for the model container")
+    python_version: str = Field(default="3.10", description="Python version for the model container")
+
     hosting_location: Optional[ModelHostingLocation] = Field(None, description="Hosting location of the model")
     model_type: Optional[ModelType] = Field(None, description="Optional model type or framework")
     request_type: Optional[HttpRequestType] = Field(None, description="Optional HTTP request type used for inference")

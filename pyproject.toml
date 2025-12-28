@@ -11,7 +11,8 @@ requires-python = ">=3.9"
 dependencies = [
     "norman_core_sdk @ git+https://github.com/norman-ml/norman_core_sdk_python.git",
 
-    "pyjwt==2.10.1"
+    "pyjwt==2.10.1",
+    "huggingface_hub"
 ]
 
 [project.optional-dependencies]
