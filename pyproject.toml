@@ -31,6 +31,7 @@ testpaths = ["tests"]
 markers = [
     "accounts: anything to do with account entities",
     "models: anything to do with model entities",
+    "authentication",
     "invocations: anything to do with invocation entities",
 
     # Test type markers
@@ -43,4 +44,5 @@ markers = [
     "handler: Tests for handler classes",
     "resolver: Tests for resolver classes",
 ]
+
 

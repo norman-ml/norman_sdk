@@ -12,9 +12,9 @@ from norman.objects.configs.model.model_version_config import ModelVersionConfig
 from norman.objects.configs.model.signature_config import SignatureConfig
 
 
-@pytest.mark.unit
-@pytest.mark.config
 class TestModelVersionConfig:
+    @pytest.mark.unit
+    @pytest.mark.config
     def test_create_with_all_fields(self) -> None:
         label = "v1.0"
         short_description = "Text classifier"
@@ -71,6 +71,8 @@ class TestModelVersionConfig:
         assert model_version_config.output_format == OutputFormat.Json
         assert model_version_config.http_headers == http_headers
 
+    @pytest.mark.unit
+    @pytest.mark.config
     def test_create_without_optional_fields(self) -> None:
         model_version_config = ModelVersionConfig(
             label="v1.0",
@@ -88,6 +90,8 @@ class TestModelVersionConfig:
         assert model_version_config.output_format is None
         assert model_version_config.http_headers is None
 
+    @pytest.mark.unit
+    @pytest.mark.config
     def test_required_fields(self) -> None:
         required_fields = {
             name for name, field in ModelVersionConfig.model_fields.items()

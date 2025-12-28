@@ -9,10 +9,10 @@ from norman.objects.factories.model_projection_factory import ModelProjectionFac
 from tests.constants import DEFAULT_ID, TEST_ACCOUNT_ID
 
 
-@pytest.mark.unit
-@pytest.mark.factory
 @pytest.mark.usefixtures("account_id_mock")
 class TestModelProjectionFactory:
+    @pytest.mark.unit
+    @pytest.mark.factory
     def test_create_returns_model_projection_instance(self) -> None:
         name = "image-classifier"
         category = "computer-vision"
@@ -40,6 +40,8 @@ class TestModelProjectionFactory:
         assert model_projection.id == DEFAULT_ID
         assert model_projection.invocation_count == 0
 
+    @pytest.mark.unit
+    @pytest.mark.factory
     def test_create_sets_account_id_from_authentication_manager(self) -> None:
         model_version_config = ModelVersionConfig(
             label="v1.0",
@@ -60,6 +62,8 @@ class TestModelProjectionFactory:
 
         assert model_projection.account_id == TEST_ACCOUNT_ID
 
+    @pytest.mark.unit
+    @pytest.mark.factory
     def test_create_creates_version_from_config(self) -> None:
         version_label = "v2.0"
 
@@ -82,6 +86,8 @@ class TestModelProjectionFactory:
 
         assert model_projection.version.label == version_label
 
+    @pytest.mark.unit
+    @pytest.mark.factory
     def test_create_with_none_user_tags_returns_empty_list(self) -> None:
         model_version_config = ModelVersionConfig(
             label="v1.0",
@@ -102,6 +108,8 @@ class TestModelProjectionFactory:
 
         assert model_projection.user_tags == []
 
+    @pytest.mark.unit
+    @pytest.mark.factory
     def test_create_with_user_tags_creates_tags(self) -> None:
         tag_name = "production"
 

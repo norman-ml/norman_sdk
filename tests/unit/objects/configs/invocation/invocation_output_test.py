@@ -4,9 +4,9 @@ from norman.objects.configs.invocation.consume_mode import ConsumeMode
 from norman.objects.configs.invocation.invocation_output_config import InvocationOutputConfig
 
 
-@pytest.mark.unit
-@pytest.mark.config
 class TestInvocationOutputConfig:
+    @pytest.mark.unit
+    @pytest.mark.config
     def test_create_with_all_fields(self) -> None:
         display_title = "generated_text"
         data = "placeholder"
@@ -21,6 +21,8 @@ class TestInvocationOutputConfig:
         assert invocation_output_config.data == data
         assert invocation_output_config.consume_mode == ConsumeMode.Stream
 
+    @pytest.mark.unit
+    @pytest.mark.config
     def test_create_without_optional_fields(self) -> None:
         display_title = "classification_result"
         data = b"output bytes"
@@ -32,6 +34,8 @@ class TestInvocationOutputConfig:
 
         assert invocation_output_config.consume_mode is None
 
+    @pytest.mark.unit
+    @pytest.mark.config
     def test_required_fields(self) -> None:
         required_fields = {
             name for name, field in InvocationOutputConfig.model_fields.items()

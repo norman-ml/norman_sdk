@@ -6,9 +6,9 @@ from norman.objects.configs.model.asset_config import AssetConfig
 from tests.constants import SAMPLE_INPUTS_DIR, SAMPLE_INPUT_TXT
 
 
-@pytest.mark.unit
-@pytest.mark.config
 class TestAssetConfig:
+    @pytest.mark.unit
+    @pytest.mark.config
     def test_create_with_all_fields(self) -> None:
         asset_name = "model_weights.pt"
         data = b"binary weights"
@@ -23,6 +23,8 @@ class TestAssetConfig:
         assert asset_config.data == data
         assert asset_config.source == InputSource.Primitive
 
+    @pytest.mark.unit
+    @pytest.mark.config
     def test_create_with_file_path(self) -> None:
         asset_name = "sample_text.txt"
         data = SAMPLE_INPUTS_DIR / SAMPLE_INPUT_TXT
@@ -36,6 +38,8 @@ class TestAssetConfig:
         assert asset_config.data == data
         assert asset_config.source is None
 
+    @pytest.mark.unit
+    @pytest.mark.config
     def test_required_fields(self) -> None:
         required_fields = {
             name for name, field in AssetConfig.model_fields.items()

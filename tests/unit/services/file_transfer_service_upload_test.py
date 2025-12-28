@@ -30,9 +30,9 @@ def socket_info_mock() -> MagicMock:
     return socket_info
 
 
-@pytest.mark.unit
 @pytest.mark.usefixtures("file_transfer_service_reset", "file_push_mock", "socket_client_mock")
 class TestFileTransferServiceUpload:
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_upload_file_opens_file_and_delegates_to_upload_from_buffer(self, tmp_path: Path, sensitive_token: Sensitive) -> None:
         model_weights_file = tmp_path / "model_weights.pt"
@@ -46,6 +46,7 @@ class TestFileTransferServiceUpload:
 
             upload_from_buffer_mock.assert_called_once()
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_upload_from_buffer_with_asset_pairing(self, file_push_mock: MagicMock, socket_client_mock: MagicMock, socket_info_mock: MagicMock, sensitive_token: Sensitive) -> None:
         file_push_mock.allocate_socket_for_asset = AsyncMock(return_value=socket_info_mock)
@@ -59,6 +60,7 @@ class TestFileTransferServiceUpload:
         file_push_mock.allocate_socket_for_asset.assert_called_once()
         file_push_mock.complete_file_transfer.assert_called_once()
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_upload_from_buffer_with_input_pairing(self, file_push_mock: MagicMock, socket_client_mock: MagicMock, socket_info_mock: MagicMock, sensitive_token: Sensitive) -> None:
         file_push_mock.allocate_socket_for_input = AsyncMock(return_value=socket_info_mock)
@@ -72,6 +74,7 @@ class TestFileTransferServiceUpload:
         file_push_mock.allocate_socket_for_input.assert_called_once()
         file_push_mock.complete_file_transfer.assert_called_once()
 
+    @pytest.mark.unit
     @pytest.mark.asyncio
     async def test_upload_from_buffer_unsupported_pairing_type_raises_error(self, file_push_mock: MagicMock, sensitive_token: Sensitive) -> None:
         file_transfer_service = FileTransferService()

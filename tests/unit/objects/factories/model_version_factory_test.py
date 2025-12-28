@@ -16,10 +16,10 @@ from norman.objects.factories.model_version_factory import ModelVersionFactory
 from tests.constants import DEFAULT_ID, DEFAULT_MODEL_ID, TEST_ACCOUNT_ID
 
 
-@pytest.mark.unit
-@pytest.mark.factory
 @pytest.mark.usefixtures("account_id_mock")
 class TestModelVersionFactory:
+    @pytest.mark.unit
+    @pytest.mark.factory
     def test_create_returns_model_version_with_defaults(self) -> None:
         label = "v1.0"
 
@@ -46,6 +46,8 @@ class TestModelVersionFactory:
         assert model_version.hosting_location == ModelHostingLocation.Internal
         assert model_version.http_headers == {}
 
+    @pytest.mark.unit
+    @pytest.mark.factory
     def test_create_sets_account_id_from_authentication_manager(self) -> None:
         model_version_config = ModelVersionConfig(
             label="v1.0",
@@ -60,6 +62,8 @@ class TestModelVersionFactory:
 
         assert model_version.account_id == TEST_ACCOUNT_ID
 
+    @pytest.mark.unit
+    @pytest.mark.factory
     def test_create_with_external_hosting_requires_url(self) -> None:
         model_version_config = ModelVersionConfig(
             label="v1.0",
@@ -75,6 +79,8 @@ class TestModelVersionFactory:
         with pytest.raises(ValueError, match="External models must define a url field"):
             ModelVersionFactory.create(model_version_config)
 
+    @pytest.mark.unit
+    @pytest.mark.factory
     def test_create_with_external_hosting_and_url(self) -> None:
         url = "https://api.example.com/predict"
         http_headers = {"Authorization": "Bearer token"}
@@ -98,6 +104,8 @@ class TestModelVersionFactory:
         assert model_version.url == url
         assert model_version.http_headers == http_headers
 
+    @pytest.mark.unit
+    @pytest.mark.factory
     def test_create_with_input_signature(self) -> None:
         input_display_title = "Text Input"
 
@@ -123,6 +131,8 @@ class TestModelVersionFactory:
         assert len(model_version.inputs) == 1
         assert model_version.inputs[0].display_title == input_display_title
 
+    @pytest.mark.unit
+    @pytest.mark.factory
     def test_create_with_output_signature(self) -> None:
         output_display_title = "Text Output"
 
@@ -148,6 +158,8 @@ class TestModelVersionFactory:
         assert len(model_version.outputs) == 1
         assert model_version.outputs[0].display_title == output_display_title
 
+    @pytest.mark.unit
+    @pytest.mark.factory
     def test_create_with_asset(self) -> None:
         asset_name = "weights.pt"
 

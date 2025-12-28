@@ -21,8 +21,6 @@ from norman.objects.configs.model.model_version_config import ModelVersionConfig
 from norman.objects.configs.model.parameter_config import ParameterConfig
 from norman.objects.configs.model.signature_config import SignatureConfig
 from norman.services.file_transfer_service import FileTransferService
-
-
 from tests.constants import (
     ENCODING_UTF8,
     LOGO_VINCITEXT,
@@ -36,6 +34,26 @@ from tests.constants import (
     VERSION_SHORT_DESC,
 )
 
+
+@pytest_asyncio.fixture(scope="session")
+async def authentication_manager() -> AsyncGenerator[AuthenticationManager, None]:
+    authentication_manager: Optional[AuthenticationManager] = None
+    try:
+        account_name: str = NameUtils.generate_account_name()
+        signup_response: SignupKeyResponse = await AuthenticationManager.signup_and_generate_key(account_name)
+        api_key: str = signup_response.api_key
+
+        authentication_manager = AuthenticationManager()
+        authentication_manager.set_api_key(api_key)
+
+        yield authentication_manager
+    except Exception as e:
+        print("An error occurred while wiring up an authentication manager")
+        print(e)
+    finally:
+        if authentication_manager is not None:
+            await authentication_manager.logout()
+
 @pytest.fixture(scope="function")
 def account_id_mock() -> Generator[PropertyMock, None, None]:
     with patch.object(
@@ -45,11 +63,6 @@ def account_id_mock() -> Generator[PropertyMock, None, None]:
     ) as mock:
         mock.return_value = TEST_ACCOUNT_ID
         yield mock
-
-def generate_unique_suffix() -> str:
-    generated_uuid = uuid.uuid1()
-    time_bytes = generated_uuid.time.to_bytes(8, byteorder="big")
-    return base64.urlsafe_b64encode(time_bytes).decode("utf-8").rstrip("=")
 
 @pytest_asyncio.fixture(scope="session")
 async def api_key() -> AsyncGenerator[str, None]:
@@ -84,7 +97,9 @@ async def authenticated_manager() -> AsyncGenerator[AuthenticationManager, None]
             await auth_manager.logout()
 
 def build_test_model_config() -> dict:
-    unique_suffix: str = generate_unique_suffix()
+    generated_uuid = uuid.uuid1()
+    time_bytes = generated_uuid.time.to_bytes(8, byteorder="big")
+    unique_suffix = base64.urlsafe_b64encode(time_bytes).decode("utf-8").rstrip("=")
 
     file_asset = AssetConfig(
         asset_name="File",
