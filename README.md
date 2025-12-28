@@ -98,13 +98,14 @@ Output values can be consumed and used in a variety of ways, according to the ne
 
 ```python
 from io import BytesIO
+
 from PIL import Image
 
 # Get the raw image bytes from the response
 image_bytes: bytes = invocation_response["Image"]
 
 # Load the image from memory
-image = Image.open(BytesIO(image_bytes))
+image: Image = Image.open(BytesIO(image_bytes))
 image.show(title="stable-diffusion-3.5-large output image")
 
 # Optionally save the image to disk
