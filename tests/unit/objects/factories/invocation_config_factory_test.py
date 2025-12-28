@@ -1,3 +1,5 @@
+import io
+
 import pytest
 from pydantic import ValidationError
 
@@ -112,3 +114,14 @@ class TestInvocationConfigFactory:
 
         with pytest.raises(ValidationError):
             InvocationConfigFactory.create(invocation_dict)
+
+    @pytest.mark.factory
+    def test_create_resolves_link_source_from_url(self) -> None:
+        invocation_dict = {
+            "model_name": "model",
+            "inputs": [{"display_title": "input", "data": "https://api.example.com/data"}],
+        }
+
+        invocation_config = InvocationConfigFactory.create(invocation_dict)
+
+        assert invocation_config.inputs[0].source == InputSource.Link
