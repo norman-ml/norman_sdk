@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
+from huggingface_hub import repo_exists
 from norman_objects.shared.inputs.input_source import InputSource
 
 
@@ -26,6 +27,9 @@ class InputSourceResolver:
 
             if InputSourceResolver._is_url(stripped):
                 return InputSource.Link
+
+            if InputSourceResolver._is_huggingface_model(stripped):
+                return InputSource.HuggingFace
 
             path = Path(stripped)
             if path.exists():
@@ -79,3 +83,10 @@ class InputSourceResolver:
             return False
 
         return True
+
+    @staticmethod
+    def _is_huggingface_model(data: str) -> bool:
+        try:
+            return repo_exists(data)
+        except Exception:
+            return False
