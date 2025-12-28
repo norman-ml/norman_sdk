@@ -12,7 +12,7 @@ dependencies = [
     "norman_core_sdk @ git+https://github.com/norman-ml/norman_core_sdk_python.git",
 
     "pyjwt==2.10.1",
-    "huggingface_hub"
+    "huggingface_hub==1.2.3"
 ]
 
 [project.optional-dependencies]
