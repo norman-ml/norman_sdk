@@ -20,7 +20,7 @@ Take your first steps with the Norman API.
 
 ## 1. Install the Norman SDK
 
-To use the Norman API in Python, install the official Norman SDK using **pip**:
+To use the Norman API in Python, install the official package using pip:
 
 ```bash
 pip install norman
