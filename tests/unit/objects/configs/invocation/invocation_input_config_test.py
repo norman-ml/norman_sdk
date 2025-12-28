@@ -12,26 +12,26 @@ class TestInvocationInputConfig:
         display_title = "text_prompt"
         data = "What is the meaning of life?"
 
-        invocation_input = InvocationInputConfig(
+        invocation_input_config = InvocationInputConfig(
             display_title=display_title,
             data=data,
             source=InputSource.Primitive,
         )
 
-        assert invocation_input.display_title == display_title
-        assert invocation_input.data == data
-        assert invocation_input.source == InputSource.Primitive
+        assert invocation_input_config.display_title == display_title
+        assert invocation_input_config.data == data
+        assert invocation_input_config.source == InputSource.Primitive
 
     def test_create_without_optional_fields(self) -> None:
         display_title = "text_input"
         data = "Hello world"
 
-        invocation_input = InvocationInputConfig(
+        invocation_input_config = InvocationInputConfig(
             display_title=display_title,
             data=data,
         )
 
-        assert invocation_input.source is None
+        assert invocation_input_config.source is None
 
     def test_required_fields(self) -> None:
         required_fields = {

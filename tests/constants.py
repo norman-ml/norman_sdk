@@ -53,18 +53,15 @@ SAMPLE_INPUT_WEBP = "sample_input.webp"
 # Text
 SAMPLE_INPUT_TXT = "sample_input.txt"
 
-
 # Default/Placeholder IDs
 DEFAULT_ID = "0"
 DEFAULT_MODEL_ID = "0"
 DEFAULT_VERSION_ID = "0"
 DEFAULT_SIGNATURE_ID = "0"
 
-
 # Test Account Data
 TEST_ACCOUNT_ID = "account-123"
 TEST_ACCOUNT_ID_ALT = "account-456"
-
 
 # Data Encodings
 ENCODING_UTF8 = "utf8"
@@ -73,7 +70,6 @@ ENCODING_MP3 = "mp3"
 ENCODING_MP4 = "mp4"
 ENCODING_PNG = "png"
 ENCODING_JPG = "jpg"
-
 
 # Model Metadata (for integration tests)
 MODEL_CATEGORY_QA = "QA Model"

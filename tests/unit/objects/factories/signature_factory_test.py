@@ -33,10 +33,7 @@ class TestTagFactory:
 
         assert model_tag.account_id == TEST_ACCOUNT_ID
 
-    def test_create_with_none_account_id_raises_validation_error(
-        self,
-        account_id_mock: PropertyMock,
-    ) -> None:
+    def test_create_with_none_account_id_raises_validation_error(self, account_id_mock: PropertyMock,) -> None:
         account_id_mock.return_value = None
         model_tag_config = ModelTagConfig(name="invalid-tag")
 

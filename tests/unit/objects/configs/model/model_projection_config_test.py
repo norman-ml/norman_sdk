@@ -14,7 +14,7 @@ class TestModelProjectionConfig:
         version_label = "v1.0"
         tag_name = "production"
 
-        model_version = ModelVersionConfig(
+        model_version_config = ModelVersionConfig(
             label=version_label,
             short_description="Text classifier",
             long_description="A model for classifying text",
@@ -22,25 +22,25 @@ class TestModelProjectionConfig:
             inputs=[],
             outputs=[],
         )
-        model_tag = ModelTagConfig(name=tag_name)
-        model_projection = ModelProjectionConfig(
+        model_tag_config = ModelTagConfig(name=tag_name)
+        model_projection_config = ModelProjectionConfig(
             name=name,
             category=category,
-            version=model_version,
-            user_tags=[model_tag],
+            version=model_version_config,
+            user_tags=[model_tag_config],
         )
 
-        assert model_projection.name == name
-        assert model_projection.category == category
-        assert model_projection.version.label == version_label
-        assert len(model_projection.user_tags) == 1
-        assert model_projection.user_tags[0].name == tag_name
+        assert model_projection_config.name == name
+        assert model_projection_config.category == category
+        assert model_projection_config.version.label == version_label
+        assert len(model_projection_config.user_tags) == 1
+        assert model_projection_config.user_tags[0].name == tag_name
 
     def test_create_without_optional_fields(self) -> None:
         name = "image-classifier"
         category = "computer-vision"
 
-        model_version = ModelVersionConfig(
+        model_version_config = ModelVersionConfig(
             label="v1.0",
             short_description="Image classifier",
             long_description="A CNN for image classification",
@@ -48,13 +48,13 @@ class TestModelProjectionConfig:
             inputs=[],
             outputs=[],
         )
-        model_projection = ModelProjectionConfig(
+        model_projection_config = ModelProjectionConfig(
             name=name,
             category=category,
-            version=model_version,
+            version=model_version_config,
         )
 
-        assert model_projection.user_tags is None
+        assert model_projection_config.user_tags is None
 
     def test_required_fields(self) -> None:
         required_fields = {

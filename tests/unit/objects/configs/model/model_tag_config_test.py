@@ -9,9 +9,9 @@ class TestModelTagConfig:
     def test_create_with_all_fields(self) -> None:
         name = "production"
 
-        model_tag = ModelTagConfig(name=name)
+        model_tag_config = ModelTagConfig(name=name)
 
-        assert model_tag.name == name
+        assert model_tag_config.name == name
 
     def test_required_fields(self) -> None:
         required_fields = {

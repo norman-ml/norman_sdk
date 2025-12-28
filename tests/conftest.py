@@ -181,3 +181,4 @@ async def uploaded_model(api_key: str) -> AsyncGenerator[UploadedModelResult, No
     print(f"[Fixture] Model uploaded: {model.id}")
 
     yield UploadedModelResult(model=model, config=model_config, norman=norman)
+

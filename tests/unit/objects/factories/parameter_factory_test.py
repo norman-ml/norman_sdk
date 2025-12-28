@@ -4,12 +4,7 @@ from norman_objects.shared.parameters.data_modality import DataModality
 
 from norman.objects.configs.model.parameter_config import ParameterConfig
 from norman.objects.factories.parameter_factory import ParameterFactory
-from tests.constants import (
-    DEFAULT_ID,
-    DEFAULT_MODEL_ID,
-    DEFAULT_SIGNATURE_ID,
-    DEFAULT_VERSION_ID,
-)
+from tests.constants import DEFAULT_ID, DEFAULT_MODEL_ID, DEFAULT_SIGNATURE_ID, DEFAULT_VERSION_ID
 
 
 @pytest.mark.unit

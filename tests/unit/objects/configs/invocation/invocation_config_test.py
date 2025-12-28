@@ -18,37 +18,37 @@ class TestInvocationConfig:
     OUTPUT_DATA_PLACEHOLDER = "placeholder"
 
     def test_create_with_all_fields(self) -> None:
-        invocation_input = InvocationInputConfig(
+        invocation_input_config = InvocationInputConfig(
             display_title=self.DISPLAY_TITLE_TEXT_PROMPT,
             data=self.INPUT_DATA_TEXT,
         )
-        invocation_output = InvocationOutputConfig(
+        invocation_output_config = InvocationOutputConfig(
             display_title=self.DISPLAY_TITLE_GENERATED_TEXT,
             data=self.OUTPUT_DATA_PLACEHOLDER,
         )
-        invocation = InvocationConfig(
+        invocation_config = InvocationConfig(
             model_name=self.MODEL_NAME_SENTIMENT,
-            inputs=[invocation_input],
-            outputs=[invocation_output],
+            inputs=[invocation_input_config],
+            outputs=[invocation_output_config],
         )
 
-        assert invocation.model_name == self.MODEL_NAME_SENTIMENT
-        assert len(invocation.inputs) == 1
-        assert invocation.inputs[0].display_title == self.DISPLAY_TITLE_TEXT_PROMPT
-        assert len(invocation.outputs) == 1
-        assert invocation.outputs[0].display_title == self.DISPLAY_TITLE_GENERATED_TEXT
+        assert invocation_config.model_name == self.MODEL_NAME_SENTIMENT
+        assert len(invocation_config.inputs) == 1
+        assert invocation_config.inputs[0].display_title == self.DISPLAY_TITLE_TEXT_PROMPT
+        assert len(invocation_config.outputs) == 1
+        assert invocation_config.outputs[0].display_title == self.DISPLAY_TITLE_GENERATED_TEXT
 
     def test_create_without_optional_fields(self) -> None:
-        invocation_input = InvocationInputConfig(
+        invocation_input_config = InvocationInputConfig(
             display_title=self.DISPLAY_TITLE_AUDIO_INPUT,
             data=self.INPUT_DATA_AUDIO,
         )
-        invocation = InvocationConfig(
+        invocation_config = InvocationConfig(
             model_name=self.MODEL_NAME_SPEECH,
-            inputs=[invocation_input],
+            inputs=[invocation_input_config],
         )
 
-        assert invocation.outputs is None
+        assert invocation_config.outputs is None
 
     def test_required_fields(self) -> None:
         required_fields = {

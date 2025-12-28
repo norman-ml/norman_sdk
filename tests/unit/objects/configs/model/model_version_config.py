@@ -27,7 +27,7 @@ class TestModelVersionConfig:
             data=b"binary weights",
             source=InputSource.Primitive,
         )
-        input_signature = SignatureConfig(
+        input_signature_config = SignatureConfig(
             display_title="Text Input",
             data_modality="text",
             data_domain="prompt",
@@ -35,7 +35,7 @@ class TestModelVersionConfig:
             receive_format=ReceiveFormat.Primitive,
             parameters=[],
         )
-        output_signature = SignatureConfig(
+        output_signature_config = SignatureConfig(
             display_title="Text Output",
             data_modality="text",
             data_domain="response",
@@ -43,13 +43,13 @@ class TestModelVersionConfig:
             receive_format=ReceiveFormat.Primitive,
             parameters=[],
         )
-        model_version = ModelVersionConfig(
+        model_version_config = ModelVersionConfig(
             label=label,
             short_description=short_description,
             long_description=long_description,
             assets=[asset_config],
-            inputs=[input_signature],
-            outputs=[output_signature],
+            inputs=[input_signature_config],
+            outputs=[output_signature_config],
             hosting_location=ModelHostingLocation.External,
             model_type=ModelType.Api,
             request_type=HttpRequestType.Post,
@@ -58,21 +58,21 @@ class TestModelVersionConfig:
             http_headers=http_headers,
         )
 
-        assert model_version.label == label
-        assert model_version.short_description == short_description
-        assert model_version.long_description == long_description
-        assert len(model_version.assets) == 1
-        assert len(model_version.inputs) == 1
-        assert len(model_version.outputs) == 1
-        assert model_version.hosting_location == ModelHostingLocation.External
-        assert model_version.model_type == ModelType.Api
-        assert model_version.request_type == HttpRequestType.Post
-        assert model_version.url == url
-        assert model_version.output_format == OutputFormat.Json
-        assert model_version.http_headers == http_headers
+        assert model_version_config.label == label
+        assert model_version_config.short_description == short_description
+        assert model_version_config.long_description == long_description
+        assert len(model_version_config.assets) == 1
+        assert len(model_version_config.inputs) == 1
+        assert len(model_version_config.outputs) == 1
+        assert model_version_config.hosting_location == ModelHostingLocation.External
+        assert model_version_config.model_type == ModelType.Api
+        assert model_version_config.request_type == HttpRequestType.Post
+        assert model_version_config.url == url
+        assert model_version_config.output_format == OutputFormat.Json
+        assert model_version_config.http_headers == http_headers
 
     def test_create_without_optional_fields(self) -> None:
-        model_version = ModelVersionConfig(
+        model_version_config = ModelVersionConfig(
             label="v1.0",
             short_description="Image classifier",
             long_description="A CNN for image classification",
@@ -81,12 +81,12 @@ class TestModelVersionConfig:
             outputs=[],
         )
 
-        assert model_version.hosting_location is None
-        assert model_version.model_type is None
-        assert model_version.request_type is None
-        assert model_version.url is None
-        assert model_version.output_format is None
-        assert model_version.http_headers is None
+        assert model_version_config.hosting_location is None
+        assert model_version_config.model_type is None
+        assert model_version_config.request_type is None
+        assert model_version_config.url is None
+        assert model_version_config.output_format is None
+        assert model_version_config.http_headers is None
 
     def test_required_fields(self) -> None:
         required_fields = {

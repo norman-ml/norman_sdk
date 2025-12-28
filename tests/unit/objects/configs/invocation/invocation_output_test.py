@@ -11,26 +11,26 @@ class TestInvocationOutputConfig:
         display_title = "generated_text"
         data = "placeholder"
 
-        invocation_output = InvocationOutputConfig(
+        invocation_output_config = InvocationOutputConfig(
             display_title=display_title,
             data=data,
             consume_mode=ConsumeMode.Stream,
         )
 
-        assert invocation_output.display_title == display_title
-        assert invocation_output.data == data
-        assert invocation_output.consume_mode == ConsumeMode.Stream
+        assert invocation_output_config.display_title == display_title
+        assert invocation_output_config.data == data
+        assert invocation_output_config.consume_mode == ConsumeMode.Stream
 
     def test_create_without_optional_fields(self) -> None:
         display_title = "classification_result"
         data = b"output bytes"
 
-        invocation_output = InvocationOutputConfig(
+        invocation_output_config = InvocationOutputConfig(
             display_title=display_title,
             data=data,
         )
 
-        assert invocation_output.consume_mode is None
+        assert invocation_output_config.consume_mode is None
 
     def test_required_fields(self) -> None:
         required_fields = {
