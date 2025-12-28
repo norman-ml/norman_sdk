@@ -37,12 +37,15 @@ from norman_objects.services.authenticate.signup.signup_key_response import Sign
 
 from norman import Norman
 
+# Signing up to norman
 signup_response: SignupKeyResponse = await Norman.signup("<username>")
+
+# Retrieving the API key from signup response 
 api_key: str = signup_response.api_key  
 ```
 
-> ⚠️ **Important:**  
-> Store your API key securely. API keys **cannot be regenerated** - if you lose your key, you will lose access to all your data across Norman clients.
+⚠️ **Important:**  
+> Store your API key securely. API keys **cannot be regenerated** - if you lose your key, you will lose access to all your models and data across Norman clients.
 
 ## 3. Run your first model
 With the Norman SDK, running a model is straightforward. You select a model from our [Model Library](https://norman-ai.com/library), check the required inputs and their format, and invoke the model using a simple API call.
@@ -61,7 +64,7 @@ In this example we will define a configuration object for an image generation mo
 ```python
 from typing import Any
 
-# define an invocation configuration object
+# Defining an invocation configuration object
 invocation_config: dict[str, Any] = {
     "model_name": "stable-diffusion-3.5-large",
     "inputs": [
@@ -80,10 +83,10 @@ For more granular control and advanced configuration options, please have a look
 ```python
 from norman import Norman
 
-# Initialize the SDK with your API key
+# Initializing a Norman instance
 norman = Norman(api_key="<your_api_key>")
 
-# Invoke the model
+# Invoking the model
 invocation_response: dict[str, bytes] = await norman.invoke(invocation_config)
 ```
 
@@ -101,14 +104,14 @@ from io import BytesIO
 
 from PIL import Image
 
-# Get the raw image bytes from the response
+# Getting the raw image bytes from the response
 image_bytes: bytes = invocation_response["Image"]
 
-# Load the image from memory
+# Loading the image from memory
 image: Image = Image.open(BytesIO(image_bytes))
 image.show(title="stable-diffusion-3.5-large output image")
 
-# Optionally save the image to disk
+# Optionally saving the image to disk
 image.save("stable_diffusion_3_5_large_output_image.png")
 ```
 
@@ -140,6 +143,7 @@ In this example we will define a configuration object for the model that display
 from typing import Any
 
 
+# Defining a model config object
 model_config: dict[str, Any] = {
     "name":"stable-diffusion-3.5-large",
     "category":"diffusion",
@@ -204,8 +208,10 @@ from norman_objects.shared.models.model_projection import ModelProjection
 
 from norman import Norman
 
+# Initializing a Norman instance
 norman = Norman(api_key="<your_api_key>")
 
+# Uploading a model to Norman
 model: ModelProjection = await norman.upload_model(model_config)
 ```
 
