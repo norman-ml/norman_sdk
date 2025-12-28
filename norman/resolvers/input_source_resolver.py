@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-from huggingface_hub import repo_exists
+import huggingface_hub
 from norman_objects.shared.inputs.input_source import InputSource
 
 
@@ -87,6 +87,6 @@ class InputSourceResolver:
     @staticmethod
     def _is_huggingface_model(data: str) -> bool:
         try:
-            return repo_exists(data)
+            return huggingface_hub.repo_exists(data)
         except Exception:
             return False
