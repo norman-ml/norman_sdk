@@ -37,10 +37,10 @@ from norman_objects.services.authenticate.signup.signup_key_response import Sign
 
 from norman import Norman
 
-# Signing up to norman
+# Signup up to Norman
 signup_response: SignupKeyResponse = await Norman.signup("<username>")
 
-# Retrieving the API key from signup response 
+# Retrieve the API key from the signup response 
 api_key: str = signup_response.api_key  
 ```
 
@@ -64,7 +64,7 @@ In this example we will define a configuration object for an image generation mo
 ```python
 from typing import Any
 
-# Defining an invocation configuration object
+# Define an invocation configuration dictionary
 invocation_config: dict[str, Any] = {
     "model_name": "stable-diffusion-3.5-large",
     "inputs": [
@@ -83,10 +83,10 @@ For more granular control and advanced configuration options, please have a look
 ```python
 from norman import Norman
 
-# Initializing a Norman instance
+# Initialize a Norman client
 norman = Norman(api_key="<your_api_key>")
 
-# Invoking the model
+# Invoke the model
 invocation_response: dict[str, bytes] = await norman.invoke(invocation_config)
 ```
 
@@ -104,14 +104,15 @@ from io import BytesIO
 
 from PIL import Image
 
-# Getting the raw image bytes from the response
+# Get the raw image bytes from the invocation response
 image_bytes: bytes = invocation_response["Image"]
+byte_stream: BytesIO = BytesIO(image_bytes)
 
-# Loading the image from memory
-image: Image = Image.open(BytesIO(image_bytes))
+# Load the image from the response byte stream
+image: Image = Image.open(byte_stream)
 image.show(title="stable-diffusion-3.5-large output image")
 
-# Optionally saving the image to disk
+# Optionally save the image to disk
 image.save("stable_diffusion_3_5_large_output_image.png")
 ```
 
@@ -143,7 +144,7 @@ In this example we will define a configuration object for the model that display
 from typing import Any
 
 
-# Defining a model config object
+# Define a model configuration dictionary
 model_config: dict[str, Any] = {
     "name":"stable-diffusion-3.5-large",
     "category":"diffusion",
@@ -208,10 +209,10 @@ from norman_objects.shared.models.model_projection import ModelProjection
 
 from norman import Norman
 
-# Initializing a Norman instance
+# Initialize a Norman client
 norman = Norman(api_key="<your_api_key>")
 
-# Uploading a model to Norman
+# Upload your model to Norman
 model: ModelProjection = await norman.upload_model(model_config)
 ```
 
