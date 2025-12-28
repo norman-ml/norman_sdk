@@ -117,7 +117,7 @@ class ModelUploadManager:
             version_id=model_asset.version_id,
             asset_id=model_asset.id,
             asset_name=model_asset.asset_name,
-            huggingface_model_id=data
+            huggingface_model_name=data
         )
         await self._hug_service.download_huggingface_model(token, download_request)
 
