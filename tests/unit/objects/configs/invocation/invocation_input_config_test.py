@@ -5,8 +5,8 @@ from norman_objects.shared.inputs.input_source import InputSource
 from norman.objects.configs.invocation.invocation_input_config import InvocationInputConfig
 
 
+@pytest.mark.unit
 class TestInvocationInputConfig:
-    @pytest.mark.unit
     @pytest.mark.config
     def test_create_with_all_fields(self) -> None:
         display_title = "text_prompt"
@@ -22,7 +22,6 @@ class TestInvocationInputConfig:
         assert invocation_input_config.data == data
         assert invocation_input_config.source == InputSource.Primitive
 
-    @pytest.mark.unit
     @pytest.mark.config
     def test_create_without_optional_fields(self) -> None:
         display_title = "text_input"
@@ -35,7 +34,6 @@ class TestInvocationInputConfig:
 
         assert invocation_input_config.source is None
 
-    @pytest.mark.unit
     @pytest.mark.config
     def test_required_fields(self) -> None:
         required_fields = {

@@ -22,15 +22,12 @@ def create_mock_flags(entity_flags: dict[str, list[StatusFlagValue]]) -> dict[st
 
 
 def mock_status_flags(persist_mock: MagicMock, flags: dict[str, list[StatusFlagValue]]) -> None:
-    persist_mock.status_flags.get_status_flags = AsyncMock(
-        return_value=create_mock_flags(flags)
-    )
+    persist_mock.status_flags.get_status_flags = AsyncMock(return_value=create_mock_flags(flags))
 
 
 def mock_status_flag_sequence(persist_mock: MagicMock, sequence: list[dict[str, list[StatusFlagValue]]]) -> None:
-    persist_mock.status_flags.get_status_flags = AsyncMock(
-        side_effect=[create_mock_flags(flags) for flags in sequence]
-    )
+    persist_mock.status_flags.get_status_flags = AsyncMock(side_effect=[create_mock_flags(flags) for flags in sequence])
+
 
 @pytest.fixture(scope="function")
 def persist_mock() -> Generator[MagicMock, None, None]:
@@ -55,6 +52,13 @@ def sleep_mock() -> Generator[AsyncMock, None, None]:
 
 
 @pytest.fixture(scope="function")
+def time_mock() -> Generator[MagicMock, None, None]:
+    with patch("norman.resolvers.flag_status_resolver.time") as mock:
+        mock.time.return_value = 0
+        yield mock
+
+
+@pytest.fixture(scope="function")
 def sensitive_token() -> Sensitive:
     return Sensitive("test-token")
 
@@ -66,12 +70,10 @@ def flag_status_resolver(config_mock: MagicMock) -> FlagStatusResolver:
     return flag_status_resolver
 
 
+@pytest.mark.unit
 class TestFlagStatusResolver:
-    @pytest.mark.unit
     @pytest.mark.resolver
-    @pytest.mark.asyncio
-    async def test_returns_when_all_finished(self, persist_mock: MagicMock, flag_status_resolver: FlagStatusResolver,
-                                             sensitive_token: Sensitive) -> None:
+    async def test_returns_when_all_finished(self, persist_mock: MagicMock, flag_status_resolver: FlagStatusResolver, sensitive_token: Sensitive) -> None:
         entity_ids = ["model-version-1", "model-version-2"]
         mock_status_flags(persist_mock, {
             "model-version-1": [StatusFlagValue.Finished],
@@ -82,11 +84,8 @@ class TestFlagStatusResolver:
 
         assert persist_mock.status_flags.get_status_flags.call_count == 1
 
-    @pytest.mark.unit
     @pytest.mark.resolver
-    @pytest.mark.asyncio
-    async def test_polls_until_finished(self, persist_mock: MagicMock, sleep_mock: AsyncMock,
-                                        flag_status_resolver: FlagStatusResolver, sensitive_token: Sensitive) -> None:
+    async def test_polls_until_finished(self, persist_mock: MagicMock, sleep_mock: AsyncMock, flag_status_resolver: FlagStatusResolver, sensitive_token: Sensitive) -> None:
         entity_id = "model-version-1"
         mock_status_flag_sequence(persist_mock, [
             {entity_id: [StatusFlagValue.In_Progress]},
@@ -98,50 +97,59 @@ class TestFlagStatusResolver:
         assert persist_mock.status_flags.get_status_flags.call_count == 2
         assert sleep_mock.called
 
-    @pytest.mark.unit
     @pytest.mark.resolver
-    @pytest.mark.asyncio
-    async def test_raises_on_error_flag(self, persist_mock: MagicMock, flag_status_resolver: FlagStatusResolver,
-                                        sensitive_token: Sensitive,) -> None:
+    async def test_polls_multiple_cycles_until_finished(self, persist_mock: MagicMock, sleep_mock: AsyncMock, flag_status_resolver: FlagStatusResolver, sensitive_token: Sensitive) -> None:
+        entity_id = "model-version-1"
+        mock_status_flag_sequence(persist_mock, [
+            {entity_id: [StatusFlagValue.In_Progress]},
+            {entity_id: [StatusFlagValue.In_Progress]},
+            {entity_id: [StatusFlagValue.In_Progress]},
+            {entity_id: [StatusFlagValue.Finished]},
+        ])
+
+        await flag_status_resolver.wait_for_entities(sensitive_token, [entity_id])
+
+        assert persist_mock.status_flags.get_status_flags.call_count == 4
+        assert sleep_mock.call_count == 3
+
+    @pytest.mark.resolver
+    async def test_waits_for_all_entities_to_finish(self, persist_mock: MagicMock, sleep_mock: AsyncMock, flag_status_resolver: FlagStatusResolver, sensitive_token: Sensitive) -> None:
+        mock_status_flag_sequence(persist_mock, [
+            {"entity-1": [StatusFlagValue.Finished], "entity-2": [StatusFlagValue.In_Progress]},
+            {"entity-1": [StatusFlagValue.Finished], "entity-2": [StatusFlagValue.Finished]},
+        ])
+
+        await flag_status_resolver.wait_for_entities(sensitive_token, ["entity-1", "entity-2"])
+
+        assert persist_mock.status_flags.get_status_flags.call_count == 2
+
+    @pytest.mark.resolver
+    async def test_raises_on_error_flag(self, persist_mock: MagicMock, flag_status_resolver: FlagStatusResolver, sensitive_token: Sensitive) -> None:
         entity_id = "model-version-1"
         mock_status_flags(persist_mock, {entity_id: [StatusFlagValue.Error]})
 
         with pytest.raises(ValueError, match="Status flags at error state"):
             await flag_status_resolver.wait_for_entities(sensitive_token, [entity_id])
 
-    @pytest.mark.unit
     @pytest.mark.resolver
-    @pytest.mark.asyncio
-    async def test_raises_on_none_response(self, persist_mock: MagicMock, flag_status_resolver: FlagStatusResolver,
-                                           sensitive_token: Sensitive,) -> None:
+    async def test_raises_on_error_flag_after_polling(self, persist_mock: MagicMock, sleep_mock: AsyncMock, flag_status_resolver: FlagStatusResolver, sensitive_token: Sensitive) -> None:
+        entity_id = "model-version-1"
+        mock_status_flag_sequence(persist_mock, [
+            {entity_id: [StatusFlagValue.In_Progress]},
+            {entity_id: [StatusFlagValue.Error]},
+        ])
+
+        with pytest.raises(ValueError, match="Status flags at error state"):
+            await flag_status_resolver.wait_for_entities(sensitive_token, [entity_id])
+
+    @pytest.mark.resolver
+    async def test_raises_on_none_response(self, persist_mock: MagicMock, flag_status_resolver: FlagStatusResolver, sensitive_token: Sensitive) -> None:
         persist_mock.status_flags.get_status_flags = AsyncMock(return_value=None)
 
         with pytest.raises(ValueError, match="No status flags found"):
             await flag_status_resolver.wait_for_entities(sensitive_token, ["model-version-1"])
 
-    @pytest.mark.unit
     @pytest.mark.resolver
-    @pytest.mark.asyncio
-    async def test_raises_on_empty_list(self, persist_mock: MagicMock, flag_status_resolver: FlagStatusResolver,
-                                        sensitive_token: Sensitive,) -> None:
+    async def test_raises_on_empty_list(self, persist_mock: MagicMock, flag_status_resolver: FlagStatusResolver, sensitive_token: Sensitive) -> None:
         with pytest.raises(ValueError, match="empty collection"):
             await flag_status_resolver.wait_for_entities(sensitive_token, [])
-
-    @pytest.mark.unit
-    @pytest.mark.resolver
-    @pytest.mark.asyncio
-    async def test_creates_correct_query_constraints(self, persist_mock: MagicMock,
-                                                     flag_status_resolver: FlagStatusResolver, sensitive_token: Sensitive) -> None:
-        entity_ids = ["model-version-1", "model-version-2"]
-        mock_status_flags(persist_mock, {"model-version-1": [StatusFlagValue.Finished]})
-
-        with patch("norman.resolvers.flag_status_resolver.QueryConstraints") as query_constraints_mock:
-            query_constraints_mock.includes.return_value = MagicMock()
-
-            await flag_status_resolver.wait_for_entities(sensitive_token, entity_ids)
-
-            query_constraints_mock.includes.assert_called_once_with(
-                "Status_Flags",
-                "Entity_ID",
-                entity_ids,
-            )

@@ -5,8 +5,8 @@ from norman.objects.configs.model.model_tag_config import ModelTagConfig
 from norman.objects.configs.model.model_version_config import ModelVersionConfig
 
 
+@pytest.mark.unit
 class TestModelProjectionConfig:
-    @pytest.mark.unit
     @pytest.mark.config
     def test_create_with_all_fields(self) -> None:
         name = "sentiment-analyzer"
@@ -36,7 +36,6 @@ class TestModelProjectionConfig:
         assert len(model_projection_config.user_tags) == 1
         assert model_projection_config.user_tags[0].name == tag_name
 
-    @pytest.mark.unit
     @pytest.mark.config
     def test_create_without_optional_fields(self) -> None:
         name = "image-classifier"
@@ -58,7 +57,6 @@ class TestModelProjectionConfig:
 
         assert model_projection_config.user_tags is None
 
-    @pytest.mark.unit
     @pytest.mark.config
     def test_required_fields(self) -> None:
         required_fields = {

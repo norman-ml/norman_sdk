@@ -7,8 +7,8 @@ from norman.objects.factories.parameter_factory import ParameterFactory
 from tests.constants import DEFAULT_ID, DEFAULT_MODEL_ID, DEFAULT_SIGNATURE_ID, DEFAULT_VERSION_ID
 
 
+@pytest.mark.unit
 class TestParameterFactory:
-    @pytest.mark.unit
     @pytest.mark.factory
     def test_create_returns_model_param_with_resolved_modality(self) -> None:
         parameter_name = "audio_waveform"
@@ -25,7 +25,6 @@ class TestParameterFactory:
         assert model_param.data_encoding == data_encoding
         assert model_param.data_modality == DataModality.Audio
 
-    @pytest.mark.unit
     @pytest.mark.factory
     def test_create_sets_default_id_values(self) -> None:
         parameter_config = ParameterConfig(
@@ -40,7 +39,6 @@ class TestParameterFactory:
         assert model_param.version_id == DEFAULT_VERSION_ID
         assert model_param.signature_id == DEFAULT_SIGNATURE_ID
 
-    @pytest.mark.unit
     @pytest.mark.factory
     def test_create_handles_case_and_whitespace(self) -> None:
         parameter_config = ParameterConfig(
@@ -52,7 +50,6 @@ class TestParameterFactory:
 
         assert model_param.data_modality == DataModality.Audio
 
-    @pytest.mark.unit
     @pytest.mark.factory
     def test_create_with_unknown_encoding_raises_value_error(self) -> None:
         parameter_config = ParameterConfig(

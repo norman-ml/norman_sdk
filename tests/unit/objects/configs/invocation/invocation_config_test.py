@@ -5,6 +5,7 @@ from norman.objects.configs.invocation.invocation_input_config import Invocation
 from norman.objects.configs.invocation.invocation_output_config import InvocationOutputConfig
 
 
+@pytest.mark.unit
 class TestInvocationConfig:
     MODEL_NAME_SENTIMENT = "sentiment-analyzer"
     MODEL_NAME_SPEECH = "speech-recognizer"
@@ -15,7 +16,6 @@ class TestInvocationConfig:
     INPUT_DATA_AUDIO = b"audio bytes"
     OUTPUT_DATA_PLACEHOLDER = "placeholder"
 
-    @pytest.mark.unit
     @pytest.mark.config
     def test_create_with_all_fields(self) -> None:
         invocation_input_config = InvocationInputConfig(
@@ -38,7 +38,6 @@ class TestInvocationConfig:
         assert len(invocation_config.outputs) == 1
         assert invocation_config.outputs[0].display_title == self.DISPLAY_TITLE_GENERATED_TEXT
 
-    @pytest.mark.unit
     @pytest.mark.config
     def test_create_without_optional_fields(self) -> None:
         invocation_input_config = InvocationInputConfig(
@@ -52,7 +51,6 @@ class TestInvocationConfig:
 
         assert invocation_config.outputs is None
 
-    @pytest.mark.unit
     @pytest.mark.config
     def test_required_fields(self) -> None:
         required_fields = {

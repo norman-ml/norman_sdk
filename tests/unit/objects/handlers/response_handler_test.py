@@ -17,10 +17,9 @@ def create_response_coroutine(
 
     return mock_coroutine()
 
+@pytest.mark.unit
 class TestResponseHandler:
-    @pytest.mark.unit
     @pytest.mark.handler
-    @pytest.mark.asyncio
     async def test_bytes_returns_bytearray(self) -> None:
         response_handler = ResponseHandler(create_response_coroutine([b"model output"]))
 
@@ -29,9 +28,7 @@ class TestResponseHandler:
         assert isinstance(result, bytearray)
         assert result == b"model output"
 
-    @pytest.mark.unit
     @pytest.mark.handler
-    @pytest.mark.asyncio
     async def test_bytes_concatenates_multiple_chunks(self) -> None:
         response_handler = ResponseHandler(create_response_coroutine([b"hello ", b"world"]))
 
@@ -39,9 +36,7 @@ class TestResponseHandler:
 
         assert result == b"hello world"
 
-    @pytest.mark.unit
     @pytest.mark.handler
-    @pytest.mark.asyncio
     async def test_bytes_returns_empty_for_empty_stream(self) -> None:
         response_handler = ResponseHandler(create_response_coroutine([]))
 
@@ -49,7 +44,7 @@ class TestResponseHandler:
 
         assert result == b""
 
-    @pytest.mark.asyncio
+    @pytest.mark.handler
     async def test_stream_returns_async_iterable(self) -> None:
         response_handler = ResponseHandler(create_response_coroutine([b"chunk_1", b"chunk_2"]))
 
@@ -58,7 +53,7 @@ class TestResponseHandler:
 
         assert collected_chunks == [b"chunk_1", b"chunk_2"]
 
-    @pytest.mark.asyncio
+    @pytest.mark.handler
     async def test_stream_preserves_chunk_boundaries(self) -> None:
         response_handler = ResponseHandler(create_response_coroutine([b"first", b"second"]))
 

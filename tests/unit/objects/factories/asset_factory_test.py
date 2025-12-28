@@ -8,9 +8,9 @@ from norman.objects.factories.asset_factory import AssetFactory
 from tests.constants import DEFAULT_ID, DEFAULT_MODEL_ID, DEFAULT_VERSION_ID, TEST_ACCOUNT_ID
 
 
+@pytest.mark.unit
 @pytest.mark.usefixtures("account_id_mock")
 class TestAssetFactory:
-    @pytest.mark.unit
     @pytest.mark.factory
     def test_create_returns_model_asset_instance(self) -> None:
         asset_name = "model-weights.pt"
@@ -30,7 +30,6 @@ class TestAssetFactory:
         assert model_asset.model_id == DEFAULT_MODEL_ID
         assert model_asset.version_id == DEFAULT_VERSION_ID
 
-    @pytest.mark.unit
     @pytest.mark.factory
     def test_create_sets_account_id_from_authentication_manager(self) -> None:
         asset_config = AssetConfig(

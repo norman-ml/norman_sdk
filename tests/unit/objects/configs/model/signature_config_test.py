@@ -7,8 +7,8 @@ from norman.objects.configs.model.parameter_config import ParameterConfig
 from norman.objects.configs.model.signature_config import SignatureConfig
 
 
+@pytest.mark.unit
 class TestSignatureConfig:
-    @pytest.mark.unit
     @pytest.mark.config
     def test_create_with_all_fields(self) -> None:
         display_title = "Audio Input"
@@ -43,7 +43,6 @@ class TestSignatureConfig:
         assert signature_config.hidden is False
         assert signature_config.default_value == default_value
 
-    @pytest.mark.unit
     @pytest.mark.config
     def test_create_without_optional_fields(self) -> None:
         signature_config = SignatureConfig(
@@ -59,7 +58,6 @@ class TestSignatureConfig:
         assert signature_config.hidden is None
         assert signature_config.default_value is None
 
-    @pytest.mark.unit
     @pytest.mark.config
     def test_required_fields(self) -> None:
         required_fields = {
