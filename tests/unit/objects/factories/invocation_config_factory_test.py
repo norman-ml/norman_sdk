@@ -1,73 +1,100 @@
 import pytest
-from unittest.mock import patch
-
 from pydantic import ValidationError
 
 from norman_objects.shared.inputs.input_source import InputSource
 
 from norman.objects.configs.invocation.invocation_config import InvocationConfig
 from norman.objects.factories.invocation_config_factory import InvocationConfigFactory
+from tests.constants import SAMPLE_INPUTS_DIR, SAMPLE_INPUT_TXT
 
 
-INPUT_SOURCE_RESOLVER_PATH = "norman.objects.factories.invocation_config_factory.InputSourceResolver"
-
-
-@pytest.fixture
-def mock_input_source_resolver():
-    with patch(INPUT_SOURCE_RESOLVER_PATH) as mock:
-        mock.resolve.return_value = InputSource.Primitive
-        yield mock
-
-
-@pytest.mark.usefixtures("mock_input_source_resolver")
+@pytest.mark.unit
+@pytest.mark.factory
 class TestInvocationConfigFactory:
-
     def test_create_returns_invocation_config_instance(self) -> None:
-        invocation_dict = {"model_name": "text-classifier", "inputs": [{"display_title": "text_input", "data": "sample text"}]}
+        model_name = "text-classifier"
+        display_title = "text_input"
+        data = "sample text"
 
-        created_config = InvocationConfigFactory.create(invocation_dict)
+        invocation_dict = {
+            "model_name": model_name,
+            "inputs": [{"display_title": display_title, "data": data}],
+        }
 
-        assert isinstance(created_config, InvocationConfig)
-        assert created_config.model_name == "text-classifier"
-        assert len(created_config.inputs) == 1
+        invocation_config = InvocationConfigFactory.create(invocation_dict)
+
+        assert isinstance(invocation_config, InvocationConfig)
+        assert invocation_config.model_name == model_name
+        assert len(invocation_config.inputs) == 1
 
     def test_create_with_outputs(self) -> None:
-        invocation_dict = {"model_name": "text-generator", "inputs": [{"display_title": "prompt", "data": "Write a story"}], "outputs": [{"display_title": "generated_text", "data": "placeholder"}]}
+        invocation_dict = {
+            "model_name": "text-generator",
+            "inputs": [{"display_title": "prompt", "data": "Write a story"}],
+            "outputs": [{"display_title": "generated_text", "data": "placeholder"}],
+        }
 
-        created_config = InvocationConfigFactory.create(invocation_dict)
+        invocation_config = InvocationConfigFactory.create(invocation_dict)
 
-        assert created_config.outputs is not None
-        assert len(created_config.outputs) == 1
+        assert invocation_config.outputs is not None
+        assert len(invocation_config.outputs) == 1
 
     def test_create_without_outputs_defaults_to_none(self) -> None:
-        invocation_dict = {"model_name": "classifier", "inputs": [{"display_title": "input", "data": "text"}]}
+        invocation_dict = {
+            "model_name": "classifier",
+            "inputs": [{"display_title": "input", "data": "text"}],
+        }
 
-        created_config = InvocationConfigFactory.create(invocation_dict)
+        invocation_config = InvocationConfigFactory.create(invocation_dict)
 
-        assert created_config.outputs is None
+        assert invocation_config.outputs is None
 
-    def test_create_calls_resolver_when_source_not_provided(self) -> None:
-        invocation_dict = {"model_name": "model", "inputs": [{"display_title": "input", "data": "text data"}]}
+    def test_create_resolves_primitive_source_from_string_data(self) -> None:
+        invocation_dict = {
+            "model_name": "model",
+            "inputs": [{"display_title": "input", "data": "text data"}],
+        }
 
-        with patch(INPUT_SOURCE_RESOLVER_PATH) as mock_resolver:
-            mock_resolver.resolve.return_value = InputSource.Primitive
+        invocation_config = InvocationConfigFactory.create(invocation_dict)
 
-            created_config = InvocationConfigFactory.create(invocation_dict)
+        assert invocation_config.inputs[0].source == InputSource.Primitive
 
-            mock_resolver.resolve.assert_called_once_with("text data")
-            assert created_config.inputs[0].source == InputSource.Primitive
+    def test_create_resolves_primitive_source_from_bytes_data(self) -> None:
+        invocation_dict = {
+            "model_name": "model",
+            "inputs": [{"display_title": "input", "data": b"binary data"}],
+        }
 
-    def test_create_does_not_call_resolver_when_source_provided(self) -> None:
-        invocation_dict = {"model_name": "model", "inputs": [{"display_title": "input", "data": "/path/to/file", "source": "File"}]}
+        invocation_config = InvocationConfigFactory.create(invocation_dict)
 
-        with patch(INPUT_SOURCE_RESOLVER_PATH) as mock_resolver:
-            created_config = InvocationConfigFactory.create(invocation_dict)
+        assert invocation_config.inputs[0].source == InputSource.Primitive
 
-            mock_resolver.resolve.assert_not_called()
-            assert created_config.inputs[0].source == InputSource.File
+    def test_create_resolves_file_source_from_path(self) -> None:
+        file_path = str(SAMPLE_INPUTS_DIR / SAMPLE_INPUT_TXT)
+
+        invocation_dict = {
+            "model_name": "model",
+            "inputs": [{"display_title": "input", "data": file_path}],
+        }
+
+        invocation_config = InvocationConfigFactory.create(invocation_dict)
+
+        assert invocation_config.inputs[0].source == InputSource.File
+
+    def test_create_preserves_explicit_source(self) -> None:
+        invocation_dict = {
+            "model_name": "model",
+            "inputs": [{"display_title": "input", "data": "some data", "source": "Primitive"}],
+        }
+
+        invocation_config = InvocationConfigFactory.create(invocation_dict)
+
+        assert invocation_config.inputs[0].source == InputSource.Primitive
 
     def test_create_with_missing_model_name_raises_validation_error(self) -> None:
-        invocation_dict = {"inputs": [{"display_title": "input", "data": "data"}]}
+        invocation_dict = {
+            "inputs": [{"display_title": "input", "data": "data"}],
+        }
 
         with pytest.raises(ValidationError):
             InvocationConfigFactory.create(invocation_dict)

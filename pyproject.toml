@@ -31,5 +31,18 @@ testpaths = ["tests"]
 markers = [
     "accounts: anything to do with account entities",
     "models: anything to do with model entities",
-    "invocations: anything to do with invocation entities"
-]
+    "invocations: anything to do with invocation entities",
+
+    # Test type markers
+    "unit: Unit tests for isolated components (no external dependencies)",
+    "integration: Integration tests requiring external services/network",
+
+    # Component markers
+    "factory: Tests for factory classes",
+    "config: Tests for configuration/pydantic models",
+    "handler: Tests for handler classes",
+    "resolver: Tests for resolver classes",
+
+    # Special markers
+    "slow: Tests that take significant time to run",]
+

@@ -1,28 +1,65 @@
+import pytest
+
 from norman.objects.configs.model.model_projection_config import ModelProjectionConfig
 from norman.objects.configs.model.model_tag_config import ModelTagConfig
 from norman.objects.configs.model.model_version_config import ModelVersionConfig
 
 
+@pytest.mark.unit
+@pytest.mark.config
 class TestModelProjectionConfig:
-
     def test_create_with_all_fields(self) -> None:
-        version = ModelVersionConfig(label="v1.0", short_description="Text classifier", long_description="A model for classifying text", assets=[], inputs=[], outputs=[])
-        tag = ModelTagConfig(name="production")
-        config = ModelProjectionConfig(name="sentiment-analyzer", category="natural-language-processing", version=version, user_tags=[tag])
+        name = "sentiment-analyzer"
+        category = "natural-language-processing"
+        version_label = "v1.0"
+        tag_name = "production"
 
-        assert config.name == "sentiment-analyzer"
-        assert config.category == "natural-language-processing"
-        assert config.version.label == "v1.0"
-        assert len(config.user_tags) == 1
-        assert config.user_tags[0].name == "production"
+        model_version = ModelVersionConfig(
+            label=version_label,
+            short_description="Text classifier",
+            long_description="A model for classifying text",
+            assets=[],
+            inputs=[],
+            outputs=[],
+        )
+        model_tag = ModelTagConfig(name=tag_name)
+        model_projection = ModelProjectionConfig(
+            name=name,
+            category=category,
+            version=model_version,
+            user_tags=[model_tag],
+        )
+
+        assert model_projection.name == name
+        assert model_projection.category == category
+        assert model_projection.version.label == version_label
+        assert len(model_projection.user_tags) == 1
+        assert model_projection.user_tags[0].name == tag_name
 
     def test_create_without_optional_fields(self) -> None:
-        version = ModelVersionConfig(label="v1.0", short_description="Image classifier", long_description="A CNN for image classification", assets=[], inputs=[], outputs=[])
-        config = ModelProjectionConfig(name="image-classifier", category="computer-vision", version=version)
+        name = "image-classifier"
+        category = "computer-vision"
 
-        assert config.user_tags is None
+        model_version = ModelVersionConfig(
+            label="v1.0",
+            short_description="Image classifier",
+            long_description="A CNN for image classification",
+            assets=[],
+            inputs=[],
+            outputs=[],
+        )
+        model_projection = ModelProjectionConfig(
+            name=name,
+            category=category,
+            version=model_version,
+        )
+
+        assert model_projection.user_tags is None
 
     def test_required_fields(self) -> None:
-        required_fields = {name for name, field in ModelProjectionConfig.model_fields.items() if field.is_required()}
+        required_fields = {
+            name for name, field in ModelProjectionConfig.model_fields.items()
+            if field.is_required()
+        }
 
         assert required_fields == {"name", "category", "version"}
