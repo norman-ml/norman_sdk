@@ -85,8 +85,8 @@ class InputSourceResolver:
         return True
 
     @staticmethod
-    def _is_huggingface_model(data: str) -> bool:
+    def _is_huggingface_model(obj: Any) -> bool:
         try:
-            return huggingface_hub.repo_exists(data)
+            return huggingface_hub.repo_exists(obj)
         except Exception:
             return False
