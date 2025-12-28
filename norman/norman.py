@@ -24,5 +24,5 @@ class Norman(metaclass=Singleton):
     async def upload_model(self, model_config: dict[str, Any]) -> ModelProjection:
         return await self._model_upload_manager.upload_model(model_config)
 
-    async def invoke(self, invocation_config: dict[str, Any]) -> dict[str, bytearray]:
+    async def invoke(self, invocation_config: dict[str, Any]) -> dict[str, bytes]:
         return await self._invocation_manager.invoke(invocation_config)

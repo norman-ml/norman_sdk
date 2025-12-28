@@ -33,14 +33,16 @@ Before making any requests, you’ll need to create an **API key**.
 This key authorizes your SDK to securely access the Norman API.
 
 ```python
+from norman_objects.services.authenticate.signup.signup_key_response import SignupKeyResponse
+
 from norman import Norman
 
-signup_response = await Norman.signup("<username>")
-api_key = signup_response.api_key 
+signup_response: SignupKeyResponse = await Norman.signup("<username>")
+api_key: str = signup_response.api_key  
 ```
 
 > ⚠️ **Important:**  
-> Store your API key securely. API keys **cannot be regenerated** - if you lose your key, you will lose access to all your data in result across norman clients.
+> Store your API key securely. API keys **cannot be regenerated** - if you lose your key, you will lose access to all your data across Norman clients.
 
 ## 3. Run your first model
 With the Norman SDK, running a model is straightforward. You select a model from our [Model Library](https://norman-ai.com/library), check the required inputs and their format, and invoke the model using a simple API call.
@@ -57,8 +59,10 @@ To run a model we must first define an invocation configuration object, defining
 In this example we will define a configuration object for an image generation model called Stable Diffusion 3.5 Large. This particular model expects one text input from the user to be mapped to the "Prompt" parameter in the model:
 
 ```python
+from typing import Any
+
 # define an invocation configuration object
-invocation_config = {
+invocation_config: dict[str, Any] = {
     "model_name": "stable-diffusion-3.5-large",
     "inputs": [
         {
@@ -80,7 +84,7 @@ from norman import Norman
 norman = Norman(api_key="<your_api_key>")
 
 # Invoke the model
-invocation_response = await norman.invoke(invocation_config)
+invocation_response: dict[str, bytes] = await norman.invoke(invocation_config)
 ```
 
 
@@ -97,7 +101,7 @@ from io import BytesIO
 from PIL import Image
 
 # Get the raw image bytes from the response
-image_bytes = invocation_response["Image"]
+image_bytes: bytes = invocation_response["Image"]
 
 # Load the image from memory
 image = Image.open(BytesIO(image_bytes))
@@ -105,7 +109,6 @@ image.show(title="stable-diffusion-3.5-large output image")
 
 # Optionally save the image to disk
 image.save("stable_diffusion_3_5_large_output_image.png")
-
 ```
 
 
@@ -133,7 +136,10 @@ it includes:
 
 In this example we will define a configuration object for the model that displays a text input widget to receive user input, and an image output widget to render the model output:
 ```python
-model_config = {
+from typing import Any
+
+
+model_config: dict[str, Any] = {
     "name":"stable-diffusion-3.5-large",
     "category":"diffusion",
     "version":{
@@ -193,11 +199,13 @@ model_config = {
 Once the model configuration is defined, all you need to deploy it is to perform a single API call. Norman uploads your configuration, stores the model assets, registers the input and output signatures, creates a new listing in the model library and makes the model available for invocation.
 
 ```python
+from norman_objects.shared.models.model_projection import ModelProjection
+
 from norman import Norman
 
 norman = Norman(api_key="<your_api_key>")
 
-model = await norman.upload_model(model_config)
+model: ModelProjection = await norman.upload_model(model_config)
 ```
 
 ## What Happens next?

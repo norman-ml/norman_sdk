@@ -3,7 +3,6 @@ from typing import Any
 
 from norman_core.clients.http_client import HttpClient
 from norman_core.services.file_pull.file_pull import FilePull
-from norman_core.services.file_push.file_push import FilePush
 from norman_core.services.persist import Persist
 from norman_core.services.retrieve.retrieve import Retrieve
 from norman_objects.services.file_pull.requests.input_download_request import InputDownloadRequest
@@ -137,7 +136,7 @@ class InvocationManager:
 
         await self._flag_status_resolver.wait_for_entities(token, entity_ids)
 
-    async def _get_response_handlers(self, token: Sensitive[str], invocation: Invocation) -> dict[str, Any]:
+    async def _get_response_handlers(self, token: Sensitive[str], invocation: Invocation) -> dict[str, ResponseHandler]:
         response_handlers = {}
 
         for output in invocation.outputs:
@@ -146,7 +145,7 @@ class InvocationManager:
 
         return response_handlers
 
-    async def _resolve_outputs(self, invocation_config: InvocationConfig, response_handlers: dict[str, ResponseHandler]) -> dict[str, Any]:
+    async def _resolve_outputs(self, invocation_config: InvocationConfig, response_handlers: dict[str, ResponseHandler]) -> dict[str, bytes]:
         output_configs = {}
         if invocation_config.outputs is not None:
             for output_config in invocation_config.outputs:
