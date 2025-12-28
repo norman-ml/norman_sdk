@@ -9,9 +9,9 @@ the Norman SDK abstracts away the complexity of running AI models
 and gives you a powerful API for all model operations.
 
 Main capabilities:
-- Easy model upload workflows
-- Simple invocation of deployed models
-- Api key registration management
+- Easy model upload workflows.
+- Simple invocation of deployed models.
+- API key registration management.
 
 For the full reference and detailed instructions, please visit our SDK documentation at https://sdk.norman-ai.com.
 
@@ -27,7 +27,7 @@ pip install norman
 ```
 
 
-## 2. Signup and Create an API Key
+## 2. Signup and create an API key
 
 Before making any requests, you’ll need to create an **API key**.  
 This key authorizes your SDK to securely access the Norman API.
@@ -50,7 +50,7 @@ api_key: str = signup_response.api_key
 ## 3. Run your first model
 With the Norman SDK, running a model is straightforward. You select a model from our [Model Library](https://norman-ai.com/library), check the required inputs and their format, and invoke the model using a simple API call.
 
-Norman makes a distinction between deploying a model and invoking it. We call their configuration classes, respectively, the Model config and the Invocation config.
+Norman makes a distinction between deploying a model and invoking it. We call their configuration classes, respectively, the Model configuration and the Invocation configuration.
 
 
 
@@ -94,10 +94,10 @@ invocation_response: dict[str, bytes] = await norman.invoke(invocation_config)
 ### Use the model outputs
 Each model uploaded to Norman has a unique output signature. When you invoke a model, the response is returned according to the structure of the output signature, formatted as a dictionary.
 
-- Dictionary keys each map to an output display title
+- Dictionary keys each map to an output display title.
 - Values are binary byte streams encoding the model output.
 
-Output values can be consumed and used in a variety of ways, according to the needs of each user. Stable Diffusion 3.5 Large exposes one output parameter called called "Image" which users can comsume:
+Output values can be consumed and used in a variety of ways, according to the needs of each user. Stable Diffusion 3.5 Large exposes one output parameter called "Image" which users can consume:
 
 ```python
 from io import BytesIO
@@ -216,6 +216,6 @@ norman = Norman(api_key="<your_api_key>")
 model: ModelProjection = await norman.upload_model(model_config)
 ```
 
-## What Happens next?
+## What happens next?
 
 Once the model has been deployed, you can run your model as many times as you need. Invocation is done using the same code used in the [Run your first model](https://github.com/norman-ml/norman_sdk_python/?tab=readme-ov-file#3-run-your-first-model) section.
