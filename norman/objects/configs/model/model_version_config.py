@@ -21,6 +21,7 @@ class ModelVersionConfig(BaseModel):
 
     cuda_version: str = Field(default="11.7.0", description="Cuda version for the model container")
     python_version: str = Field(default="3.11", description="Python version for the model container")
+    os_version: str = Field(default="22.04", description="OS version for the model container")
 
     hosting_location: Optional[ModelHostingLocation] = Field(None, description="Hosting location of the model")
     model_type: Optional[ModelType] = Field(None, description="Optional model type or framework")
