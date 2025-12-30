@@ -19,7 +19,7 @@ class ModelVersionConfig(BaseModel):
     inputs: List[SignatureConfig] = Field(description="Input signatures defining model inputs and their formats")
     outputs: List[SignatureConfig] = Field(description="Output signatures defining model outputs and their formats")
 
-    cuda_version: str = Field(default="11.7.0", description="Cuda version for the model container")
+    cuda_version: str = Field(default="11.8.0", description="Cuda version for the model container")
     python_version: str = Field(default="3.11", description="Python version for the model container")
     os_version: str = Field(default="22.04", description="OS version for the model container")
 
