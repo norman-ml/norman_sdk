@@ -8,7 +8,7 @@ from norman_core.services.persist import Persist
 from norman_objects.services.file_pull.requests.asset_download_request import AssetDownloadRequest
 from norman_objects.services.file_push.pairing.socket_asset_pairing_request import SocketAssetPairingRequest
 from norman_objects.services.hug.huggingface_download_request import HuggingFaceDownloadRequest
-from norman_objects.shared.models.model_asset import ModelAsset
+from norman_objects.shared.model_assets.model_asset import ModelAsset
 from norman_objects.shared.models.model_projection import ModelProjection
 from norman_objects.shared.security.sensitive import Sensitive
 from norman_utils_external.file_utils import FileUtils
@@ -16,7 +16,7 @@ from norman_utils_external.file_utils import FileUtils
 from norman.managers.authentication_manager import AuthenticationManager
 from norman.objects.configs.model.asset_config import AssetConfig
 from norman.objects.configs.model.model_projection_config import ModelProjectionConfig
-from norman.objects.factories.model_projection_factory import ModelProjectionFactory
+from norman.objects.factories.model.model_projection_factory import ModelProjectionFactory
 from norman.resolvers.flag_status_resolver import FlagStatusResolver
 from norman.resolvers.input_source_resolver import InputSourceResolver
 from norman.services.file_transfer_service import FileTransferService

@@ -4,7 +4,7 @@ from norman_objects.shared.model_signatures.signature_type import SignatureType
 from norman_utils_external.singleton import Singleton
 
 from norman.objects.configs.model.signature_config import SignatureConfig
-from norman.objects.factories.parameter_factory import ParameterFactory
+from norman.objects.factories.model.parameter_factory import ParameterFactory
 from norman.resolvers.signature_modality_resolver import SignatureModalityResolver
 
 

@@ -9,8 +9,8 @@ from norman_utils_external.singleton import Singleton
 
 from norman.managers.authentication_manager import AuthenticationManager
 from norman.objects.configs.model.model_version_config import ModelVersionConfig
-from norman.objects.factories.asset_factory import AssetFactory
-from norman.objects.factories.signature_factory import SignatureFactory
+from norman.objects.factories.model.asset_factory import AssetFactory
+from norman.objects.factories.model.signature_factory import SignatureFactory
 
 
 class ModelVersionFactory(metaclass=Singleton):
