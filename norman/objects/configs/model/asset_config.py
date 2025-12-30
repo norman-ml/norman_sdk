@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Optional, Union
 
 from norman_objects.shared.inputs.input_source import InputSource
-from norman_objects.shared.models.asset_name import AssetName
+from norman_objects.shared.model_assets.asset_name import AssetName
 from pydantic import BaseModel, Field
 
 
