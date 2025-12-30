@@ -2,7 +2,7 @@ from norman_objects.shared.parameters.data_modality import DataModality
 
 
 class SignatureModalityResolver:
-    _Encoding_Map = {
+    __Encoding_Map = {
         # Audio (container level)
         "aac": DataModality.Audio,
         "ac3": DataModality.Audio,
@@ -38,7 +38,7 @@ class SignatureModalityResolver:
             raise ValueError("encoding must be a non-empty string")
 
         stripped_encoding = encoding.lower().strip()
-        if stripped_encoding not in SignatureModalityResolver._Encoding_Map:
+        if stripped_encoding not in SignatureModalityResolver.__Encoding_Map:
             raise ValueError(f"Unknown signature encoding: {stripped_encoding}")
 
-        return SignatureModalityResolver._Encoding_Map[stripped_encoding]
+        return SignatureModalityResolver.__Encoding_Map[stripped_encoding]

@@ -2,7 +2,7 @@ from norman_objects.shared.parameters.data_modality import DataModality
 
 
 class ParameterModalityResolver:
-    _Encoding_Map = {
+    __Encoding_Map = {
         # Audio (frame level)
         "aac": DataModality.Audio,
         "ac3": DataModality.Audio,
@@ -40,7 +40,7 @@ class ParameterModalityResolver:
             raise ValueError("encoding must be a non-empty string")
 
         stripped_encoding = encoding.lower().strip()
-        if stripped_encoding not in ParameterModalityResolver._Encoding_Map:
+        if stripped_encoding not in ParameterModalityResolver.__Encoding_Map:
             raise ValueError(f"Unknown parameter encoding: {stripped_encoding}")
 
-        return ParameterModalityResolver._Encoding_Map[stripped_encoding]
+        return ParameterModalityResolver.__Encoding_Map[stripped_encoding]

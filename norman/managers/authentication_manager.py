@@ -53,7 +53,7 @@ class AuthenticationManager(metaclass=Singleton):
             signup_response = await authentication_service.signup.signup_and_generate_key(signup_request)
             return signup_response
 
-    async def _login_with_api_key(self) -> None:
+    async def __login_with_api_key(self) -> None:
         async with self._http_client:
             if self._api_key is None or self._api_key == "":
                 raise ValueError("API key is required. Please provide a valid API key")
@@ -67,7 +67,7 @@ class AuthenticationManager(metaclass=Singleton):
 
     async def invalidate_access_token(self) -> None:
         if self.access_token_expired:
-            await self._login_with_api_key()
+            await self.__login_with_api_key()
 
     async def logout(self) -> None:
         if self._access_token is not None:
