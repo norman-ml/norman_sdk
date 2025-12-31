@@ -19,9 +19,9 @@ class ModelVersionConfig(BaseModel):
     inputs: List[SignatureConfig] = Field(description="Input signatures defining model inputs and their formats")
     outputs: List[SignatureConfig] = Field(description="Output signatures defining model outputs and their formats")
 
-    cuda_version: str = Field(default="11.8.0", description="Cuda version for the model container")
-    python_version: str = Field(default="3.11", description="Python version for the model container")
-    ubuntu_version: str = Field(default="22.04", description="Ubuntu version for the model container")
+    cuda_version: str = Field(default="11.8.0", description="Nvidia CUDA driver version for the model runtime container")
+    python_version: str = Field(default="3.11", description="Python language version for the model runtime container")
+    ubuntu_version: str = Field(default="22.04", description="Ubuntu operating system version for the model runtime container")
 
     hosting_location: Optional[ModelHostingLocation] = Field(None, description="Hosting location of the model")
     model_type: Optional[ModelType] = Field(None, description="Optional model type or framework")
