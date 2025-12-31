@@ -99,25 +99,25 @@ class ModelUploadManager:
         )
         await self._file_transfer_service.upload_from_buffer(token, pairing_request, stream)
 
-    async def __handle_link_asset(self, token: Sensitive[str], model_asset: ModelAsset, data: str) -> None:
+    async def __handle_link_asset(self, token: Sensitive[str], model_asset: ModelAsset, link: str) -> None:
         download_request = AssetDownloadRequest(
             account_id=model_asset.account_id,
             model_id=model_asset.model_id,
             version_id=model_asset.version_id,
             asset_id=model_asset.id,
             asset_name=model_asset.asset_name,
-            links=[data]
+            links=[link]
         )
         await self._file_pull_service.submit_asset_links(token, download_request)
 
-    async def __handle_huggingface_asset(self, token: Sensitive[str], model_asset: ModelAsset, data: str) -> None:
+    async def __handle_huggingface_asset(self, token: Sensitive[str], model_asset: ModelAsset, model_name: str) -> None:
         download_request = HuggingFaceDownloadRequest(
             account_id=model_asset.account_id,
             model_id=model_asset.model_id,
             version_id=model_asset.version_id,
             asset_id=model_asset.id,
             asset_name=model_asset.asset_name,
-            huggingface_model_name=data
+            model_name=model_name
         )
         await self._hug_service.download_huggingface_model(token, download_request)
 
