@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
+import huggingface_hub
 from norman_objects.shared.inputs.input_source import InputSource
 
 
@@ -17,15 +18,18 @@ class InputSourceResolver:
                 return InputSource.File
 
             raise FileNotFoundError("No file exists at the specified location")
-        elif InputSourceResolver._is_async_stream(data):
+        elif InputSourceResolver.__is_async_stream(data):
             return InputSource.Stream
-        elif InputSourceResolver._is_sync_stream(data):
+        elif InputSourceResolver.__is_sync_stream(data):
             return InputSource.Stream
         elif isinstance(data, str):
             stripped = data.strip()
 
-            if InputSourceResolver._is_url(stripped):
+            if InputSourceResolver.__is_url(stripped):
                 return InputSource.Link
+
+            if InputSourceResolver.__is_huggingface_model(stripped):
+                return InputSource.HuggingFace
 
             path = Path(stripped)
             if path.exists():
@@ -36,7 +40,7 @@ class InputSourceResolver:
             return InputSource.Primitive
 
     @staticmethod
-    def _is_url(data: str):
+    def __is_url(data: str):
         parsed = urlparse(data)
         if parsed.scheme not in ["http", "https"]:
             return False
@@ -46,7 +50,7 @@ class InputSourceResolver:
             return True
 
     @staticmethod
-    def _is_sync_stream(obj: Any) -> bool:
+    def __is_sync_stream(obj: Any) -> bool:
         if isinstance(obj, IOBase):
             return True
 
@@ -65,7 +69,7 @@ class InputSourceResolver:
         return True
 
     @staticmethod
-    def _is_async_stream(obj: Any) -> bool:
+    def __is_async_stream(obj: Any) -> bool:
         aiter_attribute = getattr(obj, "__aiter__", None)
         if not callable(aiter_attribute):
             return False
@@ -79,3 +83,7 @@ class InputSourceResolver:
             return False
 
         return True
+
+    @staticmethod
+    def __is_huggingface_model(obj: Any) -> bool:
+        return huggingface_hub.repo_exists(obj)

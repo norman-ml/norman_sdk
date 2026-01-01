@@ -9,8 +9,8 @@ from norman_utils_external.singleton import Singleton
 
 from norman.managers.authentication_manager import AuthenticationManager
 from norman.objects.configs.model.model_version_config import ModelVersionConfig
-from norman.objects.factories.asset_factory import AssetFactory
-from norman.objects.factories.signature_factory import SignatureFactory
+from norman.objects.factories.model.asset_factory import AssetFactory
+from norman.objects.factories.model.signature_factory import SignatureFactory
 
 
 class ModelVersionFactory(metaclass=Singleton):
@@ -68,6 +68,9 @@ class ModelVersionFactory(metaclass=Singleton):
             label=version_config.label,
             short_description=version_config.short_description,
             long_description=version_config.long_description,
+            cuda_version=version_config.cuda_version,
+            python_version=version_config.python_version,
+            ubuntu_version=version_config.ubuntu_version,
             hosting_location=hosting_location,
             model_type=model_type,
             request_type=request_type,

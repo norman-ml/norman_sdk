@@ -3,8 +3,8 @@ from norman_utils_external.singleton import Singleton
 
 from norman.managers.authentication_manager import AuthenticationManager
 from norman.objects.configs.model.model_projection_config import ModelProjectionConfig
-from norman.objects.factories.model_version_factory import ModelVersionFactory
-from norman.objects.factories.tag_factory import TagFactory
+from norman.objects.factories.model.model_version_factory import ModelVersionFactory
+from norman.objects.factories.model.tag_factory import TagFactory
 
 
 class ModelProjectionFactory(metaclass=Singleton):
