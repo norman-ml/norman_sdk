@@ -1,12 +1,11 @@
+import base64
 from datetime import datetime, timezone
 from typing import Optional
-import base64
 
 import jwt
-from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicNumbers
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
-
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicNumbers
 from norman_core.clients.http_client import HttpClient
 from norman_core.services.authenticate import Authenticate
 from norman_objects.services.authenticate.login.api_key_login_request import ApiKeyLoginRequest
@@ -49,32 +48,34 @@ class AuthenticationManager(metaclass=Singleton):
         return base64.urlsafe_b64decode(data)
 
     @staticmethod
-    def _jwk_to_pem(jwk: JWK) -> str:
+    def _extract_public_key_from_jwks(jwk: JWK) -> str:
         modulus = int.from_bytes(AuthenticationManager._decode_base64url(jwk.n), byteorder='big')
         exponent = int.from_bytes(AuthenticationManager._decode_base64url(jwk.e), byteorder='big')
 
         public_numbers = RSAPublicNumbers(exponent, modulus)
         public_key = public_numbers.public_key(default_backend())
 
-        encoded_pem_key = public_key.public_bytes(
+        encoded_pem_public_key = public_key.public_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PublicFormat.SubjectPublicKeyInfo
         )
-        pem_key = encoded_pem_key.decode('utf-8')
+        pem_public_key = encoded_pem_public_key.decode('utf-8')
 
-        return pem_key
+        return pem_public_key
 
     async def _fetch_and_cache_public_key(self) -> None:
         if self._public_key is not None:
             return
 
-        jwks = await self._authentication_service.jwks.get_jwks()
+        jwks = await self._authentication_service.jwks.get_jwks_document()
         if jwks is not None:
-            self._public_key = self._jwk_to_pem(jwks[0])
+            self._public_key = self._extract_public_key_from_jwks(jwks[0])
 
-    def access_token_expired(self) -> bool:
+    async def access_token_expired(self) -> bool:
         if self._access_token is None:
             return True
+
+        await self._fetch_and_cache_public_key()
         try:
             if self._public_key is not None:
                 decoded = jwt.decode(
@@ -111,8 +112,6 @@ class AuthenticationManager(metaclass=Singleton):
             self._account_id = login_response.account.id
             self._access_token = login_response.access_token
             self._id_token = login_response.id_token
-
-            await self._fetch_and_cache_public_key()
 
     async def invalidate_access_token(self) -> None:
         if self.access_token_expired():
