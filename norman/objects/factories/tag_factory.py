@@ -3,7 +3,6 @@ from norman_utils_external.singleton import Singleton
 
 from norman.managers.authentication_manager import AuthenticationManager
 from norman.objects.configs.model.model_tag_config import ModelTagConfig
-from norman.objects.configs.model.tag_config import TagConfig
 
 
 class TagFactory(metaclass=Singleton):
