@@ -33,8 +33,6 @@ class Norman(metaclass=Singleton):
     async def tag_model(self, model_name: str, tag_name: str) -> ModelTag:
         return await self._tag_manager.tag_model(model_name, tag_name)
 
-#todo: untag
-
-    #async def untag_model(self, tag_config: dict[str, Any]) -> ModelTag:
-        #return await self._tag_manager.untag_model(tag_config)
+    async def untag_model(self, model_name: str, tag_name: str) -> int:
+        return await self._tag_manager.untag_model(model_name, tag_name)
 
