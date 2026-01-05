@@ -36,14 +36,27 @@ class AuthenticationManager(metaclass=Singleton):
     def set_api_key(self, api_key: str) -> None:
         self._api_key = api_key
 
+    @staticmethod
+    async def signup_and_generate_key(username: str) -> SignupKeyResponse:
+        async with HttpClient():
+            authentication_service = Authenticate() # because signup_and_generate_key() is a static method
+            signup_request = SignupKeyRequest(name=username)
+            signup_response = await authentication_service.signup.signup_and_generate_key(signup_request)
+            return signup_response
+
+    async def invalidate_access_token(self) -> None:
+        await self.__fetch_and_cache_public_key()
+
+        if self.access_token_expired():
+            await self.__login_with_api_key()
+
     async def __fetch_and_cache_public_key(self) -> None:
         if self._public_key is not None:
             return
 
-        jwks = await self._authentication_service.jwks.get_jwks_document()
+        jwks = await self._authentication_service.jwks.get_key_set()
         if jwks is not None:
-            jwk_list = jwks.key_set
-            self._public_key = KeyUtils.jwks_to_public_key(jwk_list)
+            self._public_key = KeyUtils.jwks_to_public_key(jwks.key_set)
 
     def access_token_expired(self) -> bool:
         if self._access_token is None:
@@ -66,14 +79,6 @@ class AuthenticationManager(metaclass=Singleton):
         except Exception:
             return True
 
-    @staticmethod
-    async def signup_and_generate_key(username: str) -> SignupKeyResponse:
-        async with HttpClient():
-            authentication_service = Authenticate() # because signup_and_generate_key() is a static method
-            signup_request = SignupKeyRequest(name=username)
-            signup_response = await authentication_service.signup.signup_and_generate_key(signup_request)
-            return signup_response
-
     async def __login_with_api_key(self) -> None:
         async with self._http_client:
             if self._api_key is None or self._api_key == "":
@@ -85,12 +90,6 @@ class AuthenticationManager(metaclass=Singleton):
             self._account_id = login_response.account.id
             self._access_token = login_response.access_token
             self._id_token = login_response.id_token
-
-    async def invalidate_access_token(self) -> None:
-        await self.__fetch_and_cache_public_key()
-
-        if self.access_token_expired():
-            await self.__login_with_api_key()
 
     async def logout(self) -> None:
         if self._access_token is not None:
