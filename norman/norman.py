@@ -35,4 +35,3 @@ class Norman(metaclass=Singleton):
 
     async def untag_model(self, model_name: str, tag_name: str) -> int:
         return await self._tag_manager.untag_model(model_name, tag_name)
-
