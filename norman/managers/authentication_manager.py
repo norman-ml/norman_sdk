@@ -1,18 +1,14 @@
-import base64
 from datetime import datetime, timezone
 from typing import Optional
 
 import jwt
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization
-from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicNumbers
 from norman_core.clients.http_client import HttpClient
 from norman_core.services.authenticate import Authenticate
 from norman_objects.services.authenticate.login.api_key_login_request import ApiKeyLoginRequest
 from norman_objects.services.authenticate.signup.signup_key_request import SignupKeyRequest
 from norman_objects.services.authenticate.signup.signup_key_response import SignupKeyResponse
-from norman_objects.shared.authorization.jwk import JWK
 from norman_objects.shared.security.sensitive import Sensitive
+from norman_utils_external.key_utils import KeyUtils
 from norman_utils_external.singleton import Singleton
 
 
@@ -40,42 +36,19 @@ class AuthenticationManager(metaclass=Singleton):
     def set_api_key(self, api_key: str) -> None:
         self._api_key = api_key
 
-    @staticmethod
-    def _decode_base64url(data: str) -> bytes:
-        padding = 4 - len(data) % 4
-        if padding != 4:
-            data += '=' * padding
-        return base64.urlsafe_b64decode(data)
-
-    @staticmethod
-    def _extract_public_key_from_jwks(jwk: JWK) -> str:
-        modulus = int.from_bytes(AuthenticationManager._decode_base64url(jwk.n), byteorder='big')
-        exponent = int.from_bytes(AuthenticationManager._decode_base64url(jwk.e), byteorder='big')
-
-        public_numbers = RSAPublicNumbers(exponent, modulus)
-        public_key = public_numbers.public_key(default_backend())
-
-        encoded_pem_public_key = public_key.public_bytes(
-            encoding=serialization.Encoding.PEM,
-            format=serialization.PublicFormat.SubjectPublicKeyInfo
-        )
-        pem_public_key = encoded_pem_public_key.decode('utf-8')
-
-        return pem_public_key
-
-    async def _fetch_and_cache_public_key(self) -> None:
+    async def __fetch_and_cache_public_key(self) -> None:
         if self._public_key is not None:
             return
 
         jwks = await self._authentication_service.jwks.get_jwks_document()
         if jwks is not None:
-            self._public_key = self._extract_public_key_from_jwks(jwks[0])
+            jwk_list = jwks.key_set
+            self._public_key = KeyUtils.jwks_to_public_key(jwk_list)
 
-    async def access_token_expired(self) -> bool:
+    def access_token_expired(self) -> bool:
         if self._access_token is None:
             return True
 
-        await self._fetch_and_cache_public_key()
         try:
             if self._public_key is not None:
                 decoded = jwt.decode(
@@ -101,7 +74,7 @@ class AuthenticationManager(metaclass=Singleton):
             signup_response = await authentication_service.signup.signup_and_generate_key(signup_request)
             return signup_response
 
-    async def _login_with_api_key(self) -> None:
+    async def __login_with_api_key(self) -> None:
         async with self._http_client:
             if self._api_key is None or self._api_key == "":
                 raise ValueError("API key is required. Please provide a valid API key")
@@ -114,8 +87,10 @@ class AuthenticationManager(metaclass=Singleton):
             self._id_token = login_response.id_token
 
     async def invalidate_access_token(self) -> None:
+        await self.__fetch_and_cache_public_key()
+
         if self.access_token_expired():
-            await self._login_with_api_key()
+            await self.__login_with_api_key()
 
     async def logout(self) -> None:
         if self._access_token is not None:
