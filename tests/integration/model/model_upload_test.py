@@ -26,14 +26,29 @@ class TestModelUpload:
         time_bytes = uuid_time.to_bytes(8, byteorder="big")
         time_base64 = base64.urlsafe_b64encode(time_bytes).decode("utf-8").rstrip("=")
 
-        file_asset = AssetConfig(
-            asset_name="File",
-            data=os.sep.join([str(Norman_Test_Root), "assets", "model_files", "text_qa_model.pt"])
-        )
-
         logo_asset = AssetConfig(
             asset_name="Logo",
-            data=os.sep.join([str(Norman_Test_Root), "assets", "model_logos", "Vincitext_logo.jpg"])
+            data=os.sep.join([str(Norman_Test_Root), "assets", "models", "logos", "Vincitext_logo.jpg"])
+        )
+
+        file_asset = AssetConfig(
+            asset_name="File",
+            data=os.sep.join([str(Norman_Test_Root), "assets", "models", "files", "text_qa_model.pt"])
+        )
+
+        runtime_asset = AssetConfig(
+            asset_name="Runtime",
+            data=os.sep.join([str(Norman_Test_Root), "assets", "models", "runtimes", "Vincitext_runtime.json"])
+        )
+
+        requirements_asset = AssetConfig(
+            asset_name="Requirements",
+            data=os.sep.join([str(Norman_Test_Root), "assets", "models", "requirements", "Vincitext_requirements.json"])
+        )
+
+        inference_asset = AssetConfig(
+            asset_name="Inference",
+            data=os.sep.join([str(Norman_Test_Root), "assets", "models", "inference", "Vincitext_inference.py"])
         )
 
         text_input_parameter = ParameterConfig(
@@ -71,7 +86,7 @@ class TestModelUpload:
             short_description="An end to end quality assurance model, used to test the model upload process through our SDK.",
             long_description="This language model can also be used during inference to test the input and output signature processing of text models. Simply write some text and have it transformed by this genuine AI model.",
 
-            assets=[file_asset, logo_asset],
+            assets=[logo_asset, file_asset, runtime_asset, requirements_asset, inference_asset],
             inputs=[text_input_signature],
             outputs=[text_output_signature]
         )
