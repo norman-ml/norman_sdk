@@ -54,9 +54,13 @@ class AuthenticationManager(metaclass=Singleton):
         if self._public_key is not None:
             return
 
-        jwks = await self._authentication_service.jwks.get_key_set()
+        async with HttpClient():
+            jwks = await self._authentication_service.jwks.get_key_set()
+
         if jwks is not None:
-            self._public_key = KeyUtils.jwks_to_public_key(jwks.key_set)
+            jwks_dict = jwks.model_dump()
+            jwk_list = jwks_dict["key_set"]
+            self._public_key = KeyUtils.jwks_to_public_key(jwk_list)
 
     def access_token_expired(self) -> bool:
         if self._access_token is None:
