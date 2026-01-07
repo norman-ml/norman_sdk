@@ -9,7 +9,7 @@ class SignatureModalityResolver:
             raise ValueError("encoding must be a non-empty string")
 
         stripped_encoding = encoding.lower().strip()
-        if stripped_encoding not in SignatureModalityMapping._Encoding_Map:
+        if stripped_encoding not in SignatureModalityMapping.Encoding_Map:
             raise ValueError(f"Unknown signature encoding: {stripped_encoding}")
 
-        return SignatureModalityMapping._Encoding_Map[stripped_encoding]
+        return SignatureModalityMapping.Encoding_Map[stripped_encoding]
