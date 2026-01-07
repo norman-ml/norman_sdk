@@ -19,15 +19,15 @@ class AuthenticationManager(metaclass=Singleton):
 
         self._api_key = None
         self._account_id = None
-        self._access_token: Optional[Sensitive[str]] = None
+        self.__access_token: Optional[Sensitive[str]] = None
         self._id_token: Optional[Sensitive[str]] = None
         self._public_key: Optional[str] = None
 
     @property
     def access_token(self) -> Sensitive[str]:
-        if self._access_token is None:
+        if self.__access_token is None:
             raise ValueError("Access token is not available — you may need to log in first")
-        return self._access_token
+        return self.__access_token
 
     @property
     def account_id(self) -> Optional[str]:
@@ -63,13 +63,13 @@ class AuthenticationManager(metaclass=Singleton):
             self._public_key = KeyUtils.jwks_to_public_key(jwk_list)
 
     def access_token_expired(self) -> bool:
-        if self._access_token is None:
+        if self.__access_token is None:
             return True
 
         try:
             if self._public_key is not None:
                 decoded = jwt.decode(
-                    self._access_token.value(),
+                    self.__access_token.value(),
                     self._public_key,
                     algorithms=["RS256"],
                     audience="norman:server"
@@ -92,13 +92,13 @@ class AuthenticationManager(metaclass=Singleton):
             login_response = await self._authentication_service.login.login_with_key(login_request)
 
             self._account_id = login_response.account.id
-            self._access_token = login_response.access_token
+            self.__access_token = Sensitive(login_response.access_token)
             self._id_token = login_response.id_token
 
     async def logout(self) -> None:
-        if self._access_token is not None:
+        if self.__access_token is not None:
             async with HttpClient():
-                await self._authentication_service.logout.logout(self._access_token)
+                await self._authentication_service.logout.logout(self.__access_token)
 
-                self._access_token = None
+                self.__access_token = None
                 self._id_token = None
