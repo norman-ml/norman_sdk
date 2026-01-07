@@ -92,7 +92,7 @@ class AuthenticationManager(metaclass=Singleton):
             login_response = await self._authentication_service.login.login_with_key(login_request)
 
             self._account_id = login_response.account.id
-            self.__access_token = Sensitive(login_response.access_token)
+            self.__access_token = login_response.access_token
             self._id_token = login_response.id_token
 
     async def logout(self) -> None:
