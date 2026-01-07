@@ -13,4 +13,4 @@ class ParameterModalityResolver:
         if stripped_encoding not in ParameterModalityMapping.Encoding_Map:
             raise ValueError(f"Unknown parameter encoding: {stripped_encoding}")
 
-        return ParameterModalityMapping.Encoding_Map.get[stripped_encoding]
+        return ParameterModalityMapping.Encoding_Map.get(stripped_encoding)
