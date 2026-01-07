@@ -28,15 +28,12 @@ class TestModelUpload:
 
         file_asset = AssetConfig(
             asset_name="File",
-            data=os.sep.join([str(Norman_Test_Root), "assets", "model_files", "text_qa_model.pt"]),
-            data_modality="File"
+            data=os.sep.join([str(Norman_Test_Root), "assets", "model_files", "text_qa_model.pt"])
         )
 
         logo_asset = AssetConfig(
             asset_name="Logo",
-            data=os.sep.join([str(Norman_Test_Root), "assets", "model_logos", "Vincitext_logo.jpg"]),
-            data_modality="Image"
-
+            data=os.sep.join([str(Norman_Test_Root), "assets", "model_logos", "Vincitext_logo.jpg"])
         )
 
         text_input_parameter = ParameterConfig(
