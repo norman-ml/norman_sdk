@@ -20,7 +20,7 @@ class TagManager:
             model = next(iter(models.values()))
             model_id = model.id
             model_tag = ModelTag(account_id=self._authentication_manager.account_id, model_id=model_id, name=tag_name)
-            new_tag = await self._persist_service.tags.add_tag(self._authentication_manager.access_token, [model_tag])
+            new_tag = await self._persist_service.tags.create_tags(self._authentication_manager.access_token, [model_tag])
 
         return new_tag
 
@@ -34,4 +34,4 @@ class TagManager:
             tag_model_id_constraints = QueryConstraints.equals("Model_Tags", "Model_ID", model_id)
             tag_name_constraints = QueryConstraints.equals("Model_Tags", "Name", tag_name)
             tag_constraints = tag_model_id_constraints & tag_name_constraints
-            return await self._persist_service.tags.delete_tag(self._authentication_manager.access_token, tag_constraints)
+            return await self._persist_service.tags.delete_tags(self._authentication_manager.access_token, tag_constraints)
