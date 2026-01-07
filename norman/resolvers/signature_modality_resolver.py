@@ -12,4 +12,4 @@ class SignatureModalityResolver:
         if stripped_encoding not in SignatureModalityMapping.Encoding_Map:
             raise ValueError(f"Unknown signature encoding: {stripped_encoding}")
 
-        return SignatureModalityMapping.Encoding_Map[stripped_encoding]
+        return SignatureModalityMapping.Encoding_Map.get[stripped_encoding]
