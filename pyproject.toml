@@ -9,7 +9,7 @@ description = "Norman SDK"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
-    "norman_core_sdk @ git+https://github.com/norman-ml/norman_core_sdk_python.git",
+    "norman_core_sdk @ git+https://github.com/norman-ml/norman_core_sdk_python.git@86c76n0d2/dev/expanding-tests",
 
     "pyjwt==2.10.1"
 ]
@@ -31,5 +31,18 @@ testpaths = ["tests"]
 markers = [
     "accounts: anything to do with account entities",
     "models: anything to do with model entities",
-    "invocations: anything to do with invocation entities"
+    "invocations: anything to do with invocation entities",
+
+    # Test type markers
+    "unit: Unit tests for isolated components (no external dependencies)",
+    "integration: Integration tests requiring external services/network",
+
+    # Component markers
+    "factory: Tests for factory classes",
+    "config: Tests for configuration/pydantic models",
+    "handler: Tests for handler classes",
+    "resolver: Tests for resolver classes",
+    "services: Tests for service classes",
 ]
+
+

@@ -1,107 +1,134 @@
-import base64
-import os
-import uuid
-
 import pytest
-from norman_objects.shared.model_signatures.receive_format import ReceiveFormat
-from norman_objects.shared.parameters.data_modality import DataModality
+from norman_core.clients.http_client import HttpClient
+from norman_objects.shared.models.model import Model
+from norman_objects.shared.models.model_projection import ModelProjection
+from norman_objects.shared.queries.query_constraints import QueryConstraints
+from norman_objects.shared.status_flags.status_flag import StatusFlag
+from norman_objects.shared.status_flags.status_flag_value import StatusFlagValue
+from pydantic import TypeAdapter
 
-from norman import Norman
 from norman.managers.authentication_manager import AuthenticationManager
-from norman.objects.configs.model.asset_config import AssetConfig
-from norman.objects.configs.model.model_projection_config import ModelProjectionConfig
-from norman.objects.configs.model.model_tag_config import ModelTagConfig
-from norman.objects.configs.model.model_version_config import ModelVersionConfig
-from norman.objects.configs.model.parameter_config import ParameterConfig
-from norman.objects.configs.model.signature_config import SignatureConfig
-from tests.conftest import Norman_Test_Root
+from tests.conftest import UploadedModelResult
 
 
-@pytest.mark.usefixtures("api_key")
+@pytest.mark.integration
 class TestModelUpload:
     @pytest.mark.models
-    async def test_create_model(self, api_key: str) -> None:
-        generated_uuid = uuid.uuid1()
-        uuid_time = generated_uuid.time
-        time_bytes = uuid_time.to_bytes(8, byteorder="big")
-        time_base64 = base64.urlsafe_b64encode(time_bytes).decode("utf-8").rstrip("=")
+    async def test_create_model(self, uploaded_model: UploadedModelResult) -> None:
+        model_projection: ModelProjection = uploaded_model.model
 
-        file_asset = AssetConfig(
-            asset_name="File",
-            data=os.sep.join([str(Norman_Test_Root), "assets", "model_files", "text_qa_model.pt"])
-        )
-
-        logo_asset = AssetConfig(
-            asset_name="Logo",
-            data=os.sep.join([str(Norman_Test_Root), "assets", "model_logos", "Vincitext_logo.jpg"])
-        )
-
-        text_input_parameter = ParameterConfig(
-            parameter_name="raw_text",
-            data_encoding="utf8",
-        )
-
-        text_input_signature = SignatureConfig(
-            display_title="Original text",
-            data_modality=DataModality.Text,
-            data_domain="prompt",
-            data_encoding="utf8",
-            receive_format=ReceiveFormat.File,
-
-            parameters=[text_input_parameter]
-        )
-
-        text_output_parameter = ParameterConfig(
-            parameter_name="reverse_text",
-            data_encoding="utf8",
-        )
-
-        text_output_signature = SignatureConfig(
-            display_title="Reversed text",
-            data_modality=DataModality.Text,
-            data_domain="llm_slop",
-            data_encoding="utf8",
-            receive_format=ReceiveFormat.File,
-
-            parameters=[text_output_parameter]
-        )
-
-        version_config = ModelVersionConfig(
-            label=f"Version Aleph {time_base64}",
-            short_description="An end to end quality assurance model, used to test the model upload process through our SDK.",
-            long_description="This language model can also be used during inference to test the input and output signature processing of text models. Simply write some text and have it transformed by this genuine AI model.",
-
-            assets=[file_asset, logo_asset],
-            inputs=[text_input_signature],
-            outputs=[text_output_signature]
-        )
-
-        first_tag_config = ModelTagConfig(name="SLM")
-        second_tag_config = ModelTagConfig(name="QA")
-        third_tag_config = ModelTagConfig(name="Test")
-
-        model_config = ModelProjectionConfig(
-            name="VinciText SDK",
-            category="QA Model",
-            version=version_config,
-            user_tags=[first_tag_config, second_tag_config, third_tag_config]
-        )
-
-        raw_model_config = model_config.model_dump()
-
-        norman = Norman(api_key)
-        model = await norman.upload_model(raw_model_config)
-
-        print(model.model_dump())
+        assert model_projection is not None
+        assert isinstance(model_projection, ModelProjection)
+        assert model_projection.id != "0"
+        assert model_projection.account_id
+        assert model_projection.name
+        assert model_projection.category
+        assert model_projection.version is not None
+        assert model_projection.version.id != "0"
 
     @pytest.mark.models
-    def test_upload_model_configuration(self, authentication_manager: AuthenticationManager) -> None:
-        pass
+    async def test_upload_model_configuration(self, api_key: str, uploaded_model: UploadedModelResult) -> None:
+        model_projection: ModelProjection = uploaded_model.model
+        model_config: dict = uploaded_model.config
+
+        authentication_manager = AuthenticationManager()
+        authentication_manager.set_api_key(api_key)
+        await authentication_manager.invalidate_access_token()
+
+        async with HttpClient() as http_client:
+            query_constraints = QueryConstraints.equals("Models", "ID", model_projection.id)
+            response = await http_client.post(
+                "/persist/models/get",
+                authentication_manager.access_token,
+                json=query_constraints.model_dump(mode="json"),
+            )
+
+        assert response is not None
+        assert isinstance(response, dict)
+        assert model_projection.id in response
+
+        models_by_id = TypeAdapter(dict[str, Model]).validate_python(response)
+        db_model: Model = models_by_id[model_projection.id]
+
+        assert db_model.name == model_config["name"]
+        assert db_model.category == model_config["category"]
+        assert db_model.account_id == model_projection.account_id
+        assert len(db_model.versions) > 0
+
+        db_version = next((v for v in db_model.versions if v.id == model_projection.version.id), None)
+        assert db_version is not None
+
+        version_config: dict = model_config["version"]
+        assert db_version.label == version_config["label"]
+        assert db_version.short_description == version_config["short_description"]
+        assert db_version.long_description == version_config["long_description"]
+        assert len(db_version.assets) == len(version_config["assets"])
+        assert len(db_version.inputs) == len(version_config["inputs"])
+        assert len(db_version.outputs) == len(version_config["outputs"])
+
+        expected_asset_names: set[str] = {asset["asset_name"] for asset in version_config["assets"]}
+        actual_asset_names: set[str] = {asset.asset_name for asset in db_version.assets}
+        assert actual_asset_names == expected_asset_names
+
+        expected_tag_names: set[str] = {tag["name"] for tag in model_config["user_tags"]}
+        actual_tag_names: set[str] = {tag.name for tag in db_model.user_tags}
+        assert actual_tag_names == expected_tag_names
 
     @pytest.mark.models
-    def test_upload_model_asset(self, authentication_manager: AuthenticationManager) -> None:
-        pass
+    async def test_upload_model_asset(self, uploaded_model: UploadedModelResult) -> None:
+        model_projection: ModelProjection = uploaded_model.model
+        model_config: dict = uploaded_model.config
+
+        assert model_projection.version.assets is not None
+        assert len(model_projection.version.assets) > 0
+
+        expected_assets: dict = {asset["asset_name"]: asset for asset in model_config["version"]["assets"]}
+
+        for model_asset in model_projection.version.assets:
+            assert model_asset.id != "0"
+            assert model_asset.model_id == model_projection.id
+            assert model_asset.version_id == model_projection.version.id
+            assert model_asset.account_id == model_projection.account_id
+            assert model_asset.asset_name in expected_assets
+
+        actual_asset_names: set[str] = {asset.asset_name for asset in model_projection.version.assets}
+        expected_asset_names: set[str] = set(expected_assets.keys())
+        assert actual_asset_names == expected_asset_names
 
     @pytest.mark.models
-    def test_wait_for_status_flags(self, authentication_manager: AuthenticationManager) -> None:
-        pass
+    async def test_wait_for_status_flags(self, api_key: str, uploaded_model: UploadedModelResult) -> None:
+        model_projection: ModelProjection = uploaded_model.model
+        entity_ids: list[str] = uploaded_model.entity_ids
+
+        authentication_manager = AuthenticationManager()
+        authentication_manager.set_api_key(api_key)
+        await authentication_manager.invalidate_access_token()
+
+        async with HttpClient() as http_client:
+            query_constraints = QueryConstraints.includes("Status_Flags", "Entity_ID", entity_ids)
+            response = await http_client.post(
+                "/persist/flags/get",
+                authentication_manager.access_token,
+                json=query_constraints.model_dump(mode="json"),
+            )
+
+        assert response is not None
+
+        status_flags_by_entity = TypeAdapter(dict[str, list[StatusFlag]]).validate_python(response)
+        assert isinstance(status_flags_by_entity, dict)
+
+        all_flags: list[StatusFlag] = []
+        for entity_id, flags in status_flags_by_entity.items():
+            assert isinstance(entity_id, str)
+            assert isinstance(flags, list)
+            all_flags.extend(flags)
+
+        assert len(all_flags) > 0
+
+        for status_flag in all_flags:
+            assert isinstance(status_flag, StatusFlag)
+            assert status_flag.id != "0"
+            assert status_flag.entity_id in entity_ids
+            assert status_flag.account_id == model_projection.account_id
+            assert isinstance(status_flag.flag_value, StatusFlagValue)
+            assert status_flag.flag_value == StatusFlagValue.Finished
