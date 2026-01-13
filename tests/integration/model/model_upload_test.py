@@ -38,14 +38,14 @@ class TestModelUpload:
 
         text_input_parameter = ParameterConfig(
             parameter_name="raw_text",
-            data_encoding="utf8",
+            channel_encoding="utf8",
         )
 
         text_input_signature = SignatureConfig(
             display_title="Original text",
             data_modality=DataModality.Text,
             data_domain="prompt",
-            data_encoding="utf8",
+            channel_encoding="utf8",
             receive_format=ReceiveFormat.File,
 
             parameters=[text_input_parameter]
@@ -53,14 +53,14 @@ class TestModelUpload:
 
         text_output_parameter = ParameterConfig(
             parameter_name="reverse_text",
-            data_encoding="utf8",
+            channel_encoding="utf8",
         )
 
         text_output_signature = SignatureConfig(
             display_title="Reversed text",
             data_modality=DataModality.Text,
             data_domain="llm_slop",
-            data_encoding="utf8",
+            channel_encoding="utf8",
             receive_format=ReceiveFormat.File,
 
             parameters=[text_output_parameter]
