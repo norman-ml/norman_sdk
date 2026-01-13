@@ -11,22 +11,17 @@ class SignatureFactory(metaclass=Singleton):
 
     @staticmethod
     def create(signature_config: SignatureConfig, signature_type: SignatureType) -> ModelSignature:
-        if signature_config.container_encoding is not None:
-            container_encoding = signature_config.container_encoding
-        else:
-            container_encoding = None # TODO tmp until default resolver
+        container_encoding = signature_config.container_encoding
+        if container_encoding is None:
+            pass # TODO implement
 
         http_location = HttpLocation.Body
         if signature_config.http_location is not None:
             http_location = signature_config.http_location
 
-        hidden = False
-        if signature_config.hidden is not None:
-            hidden = signature_config.hidden
-
-        default_value = None
-        if signature_config.default_value is not None:
-            default_value = signature_config.default_value
+        hidden = signature_config.hidden
+        if signature_config.hidden is None:
+            hidden = False
 
         parameters = []
         for parameter in signature_config.parameters:
@@ -48,7 +43,7 @@ class SignatureFactory(metaclass=Singleton):
             http_location=http_location,
             hidden=hidden,
             display_title=signature_config.display_title,
-            default_value=default_value,
+            default_value=signature_config.default_value,
             parameters=parameters,
             transforms=transforms,
             signature_args=signature_args

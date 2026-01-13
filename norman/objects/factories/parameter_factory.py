@@ -8,30 +8,28 @@ class ParameterFactory(metaclass=Singleton):
 
     @staticmethod
     def create(parameter_config: ParameterConfig) -> ModelParameter:
-        if parameter_config.channel_encoding is not None:
-            channel_encoding = parameter_config.channel_encoding
-        else:
-            channel_encoding = None # TODO tmp until default resolver
+        channel_encoding = parameter_config.container_encoding
+        if channel_encoding is None:
+            pass # TODO implement
 
-        if parameter_config.sample_encoding is not None:
-            sample_encoding = parameter_config.sample_encoding
-        else:
-            sample_encoding = None # TODO tmp until default resolver
+        sample_encoding = parameter_config.sample_encoding
+        if sample_encoding is None:
+            pass  # TODO implement
 
-        if parameter_config.tensor_encoding is not None:
-            tensor_encoding = parameter_config.tensor_encoding
-        else:
-            tensor_encoding = None # TODO tmp until default resolver
+        tensor_encoding = parameter_config.tensor_encoding
+        if tensor_encoding is None:
+            pass  # TODO implement
 
         model_param = ModelParameter(
             id=parameter_config.id,
             model_id=parameter_config.model_id,
             version_id=parameter_config.version_id,
             signature_id=parameter_config.signature_id,
+            parameter_name=parameter_config.parameter_name,
+            data_modality=parameter_config.data_modality,
             channel_encoding=channel_encoding,
             sample_encoding=sample_encoding,
-            tensor_encoding=tensor_encoding,
-            parameter_name=parameter_config.parameter_name
+            tensor_encoding=tensor_encoding
         )
 
         return model_param
