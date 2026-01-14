@@ -22,7 +22,6 @@ Norman_Test_Root = Path(__file__).resolve().parents[3]
 class TestModelUpload:
     @pytest.mark.models
     async def test_create_model(self, api_key: str) -> None:
-        print(api_key)
         generated_uuid = uuid.uuid1()
         uuid_time = generated_uuid.time
         time_bytes = uuid_time.to_bytes(8, byteorder="big")
