@@ -18,7 +18,9 @@ class SignatureConfig(BaseModel):
 
     parameters: list[ParameterConfig]
 
-    container_encoding: Optional[str] = Field(description="Encoding format in which the model expects to receive inputs for the model signature")
+    container_encoding: Optional[str] = Field(None, description="Encoding format in which the model expects to receive inputs for the model signature")
     http_location: Optional[HttpLocation] = Field(None, description="Optional HTTP location of the value when transmitted to externally histed models over HTTP")
     hidden: Optional[bool] = Field(None, description="If true, this field is hidden from users in graphical clients")
     default_value: Optional[str] = Field(None, description="Fallback value to use when no explicit input is given by the user")
+
+    signature_arguments: Optional[dict[str, str]] = Field(None, description="Additional arguments to control file encoding and serialization")

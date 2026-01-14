@@ -1,10 +1,13 @@
 from norman_objects.shared.model_signatures.http_location import HttpLocation
 from norman_objects.shared.model_signatures.model_signature import ModelSignature
+from norman_objects.shared.model_signatures.receive_format import ReceiveFormat
 from norman_objects.shared.model_signatures.signature_type import SignatureType
+from norman_objects.shared.parameters.data_modality import DataModality
 from norman_utils_external.singleton import Singleton
 
 from norman.objects.configs.model.signature_config import SignatureConfig
 from norman.objects.factories.parameter_factory import ParameterFactory
+from norman.objects.factories.signature_argument_factory import SignatureArgumentFactory
 
 
 class SignatureFactory(metaclass=Singleton):
@@ -15,9 +18,9 @@ class SignatureFactory(metaclass=Singleton):
         if container_encoding is None:
             pass # TODO implement
 
-        http_location = HttpLocation.Body
-        if signature_config.http_location is not None:
-            http_location = signature_config.http_location
+        http_location = signature_config.http_location
+        if signature_config.http_location is None:
+            http_location = HttpLocation.Body
 
         hidden = signature_config.hidden
         if signature_config.hidden is None:
@@ -29,7 +32,7 @@ class SignatureFactory(metaclass=Singleton):
 
         # Currently not defined by users, defined for completeness
         transforms = []
-        signature_args = {}
+        signature_args = SignatureArgumentFactory.create(signature_config.signature_arguments, signature_config.container_encoding)
 
         model_signature = ModelSignature(
             id=signature_config.id,
