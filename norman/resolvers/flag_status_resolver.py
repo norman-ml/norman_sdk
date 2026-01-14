@@ -5,7 +5,6 @@ from typing import Sequence
 from norman_core.services.persist import Persist
 from norman_objects.shared.queries.query_constraints import QueryConstraints
 from norman_objects.shared.security.sensitive import Sensitive
-from norman_objects.shared.status_flags.status_flag import StatusFlag
 from norman_objects.shared.status_flags.status_flag_value import StatusFlagValue
 
 from norman._app_config import NormanAppConfig
