@@ -14,13 +14,15 @@ from norman.objects.configs.model.model_tag_config import ModelTagConfig
 from norman.objects.configs.model.model_version_config import ModelVersionConfig
 from norman.objects.configs.model.parameter_config import ParameterConfig
 from norman.objects.configs.model.signature_config import SignatureConfig
-from tests.conftest import Norman_Test_Root
+from pathlib import Path
+Norman_Test_Root = Path(__file__).resolve().parents[3]
 
 
 @pytest.mark.usefixtures("api_key")
 class TestModelUpload:
     @pytest.mark.models
     async def test_create_model(self, api_key: str) -> None:
+        print(api_key)
         generated_uuid = uuid.uuid1()
         uuid_time = generated_uuid.time
         time_bytes = uuid_time.to_bytes(8, byteorder="big")
@@ -28,24 +30,27 @@ class TestModelUpload:
 
         file_asset = AssetConfig(
             asset_name="File",
-            data=os.sep.join([str(Norman_Test_Root), "assets", "model_files", "text_qa_model.pt"])
+            data=os.sep.join([str(Norman_Test_Root), "tests", "assets", "model_files", "text_qa_model.pt"])
         )
 
         logo_asset = AssetConfig(
             asset_name="Logo",
-            data=os.sep.join([str(Norman_Test_Root), "assets", "model_logos", "Vincitext_logo.jpg"])
+            data=os.sep.join([str(Norman_Test_Root), "tests", "assets", "model_logos", "Vincitext_logo.jpg"])
         )
 
         text_input_parameter = ParameterConfig(
             parameter_name="raw_text",
+            channel_modality="Text",
             channel_encoding="utf8",
+            sample_encoding="yuv420p",
+            tensor_encoding="torch.uint8",
         )
 
         text_input_signature = SignatureConfig(
             display_title="Original text",
-            data_modality=DataModality.Text,
+            container_modality=DataModality.Text,
             data_domain="prompt",
-            channel_encoding="utf8",
+            container_encoding="utf8",
             receive_format=ReceiveFormat.File,
 
             parameters=[text_input_parameter]
@@ -53,14 +58,17 @@ class TestModelUpload:
 
         text_output_parameter = ParameterConfig(
             parameter_name="reverse_text",
+            channel_modality="Text",
             channel_encoding="utf8",
+            sample_encoding="yuv420p",
+            tensor_encoding="torch.uint8",
         )
 
         text_output_signature = SignatureConfig(
             display_title="Reversed text",
-            data_modality=DataModality.Text,
+            container_modality=DataModality.Text,
             data_domain="llm_slop",
-            channel_encoding="utf8",
+            container_encoding="utf8",
             receive_format=ReceiveFormat.File,
 
             parameters=[text_output_parameter]
