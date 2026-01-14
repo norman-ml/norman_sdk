@@ -40,17 +40,17 @@ class TestModelUpload:
 
         text_input_parameter = ParameterConfig(
             parameter_name="raw_text",
-            channel_modality="Text",
+            channel_modality=DataModality.Text,
             channel_encoding="utf8",
-            sample_encoding="yuv420p",
-            tensor_encoding="torch.uint8",
+            sample_encoding="u8",
+            tensor_encoding="int64",
         )
 
         text_input_signature = SignatureConfig(
             display_title="Original text",
             container_modality=DataModality.Text,
             data_domain="prompt",
-            container_encoding="utf8",
+            container_encoding="txt",
             receive_format=ReceiveFormat.File,
 
             parameters=[text_input_parameter]
@@ -58,17 +58,17 @@ class TestModelUpload:
 
         text_output_parameter = ParameterConfig(
             parameter_name="reverse_text",
-            channel_modality="Text",
+            channel_modality=DataModality.Text,
             channel_encoding="utf8",
-            sample_encoding="yuv420p",
-            tensor_encoding="torch.uint8",
+            sample_encoding="u8",
+            tensor_encoding="int64",
         )
 
         text_output_signature = SignatureConfig(
             display_title="Reversed text",
             container_modality=DataModality.Text,
             data_domain="llm_slop",
-            container_encoding="utf8",
+            container_encoding="txt",
             receive_format=ReceiveFormat.File,
 
             parameters=[text_output_parameter]
