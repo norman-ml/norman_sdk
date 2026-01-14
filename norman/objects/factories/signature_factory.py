@@ -1,8 +1,8 @@
 from norman_objects.shared.model_signatures.http_location import HttpLocation
 from norman_objects.shared.model_signatures.model_signature import ModelSignature
-from norman_objects.shared.model_signatures.receive_format import ReceiveFormat
 from norman_objects.shared.model_signatures.signature_type import SignatureType
-from norman_objects.shared.parameters.data_modality import DataModality
+from norman_utils_external.encoding_combinations import EncodingCombinations
+from norman_utils_external.encoding_defaults import EncodingDefaults
 from norman_utils_external.singleton import Singleton
 
 from norman.objects.configs.model.signature_config import SignatureConfig
@@ -11,12 +11,22 @@ from norman.objects.factories.signature_argument_factory import SignatureArgumen
 
 
 class SignatureFactory(metaclass=Singleton):
-
     @staticmethod
     def create(signature_config: SignatureConfig, signature_type: SignatureType) -> ModelSignature:
+        container_modality_name = signature_config.container_modality.lower()
+        if container_modality_name not in EncodingDefaults.Container_Map:
+            raise KeyError("Signature container modality has no default container encodings")
+
         container_encoding = signature_config.container_encoding
         if container_encoding is None:
-            pass # TODO implement
+            container_encoding = EncodingDefaults.Container_Map[container_modality_name]
+
+        if container_modality_name not in EncodingCombinations.Combinations_Map:
+            raise KeyError("Signature container data modality is not supported")
+
+        supported_container_encodings = EncodingCombinations.Combinations_Map[container_modality_name]
+        if container_encoding not in supported_container_encodings:
+            raise KeyError("Signature container encoding is not supported for the resolved container modality")
 
         http_location = signature_config.http_location
         if signature_config.http_location is None:
@@ -28,7 +38,7 @@ class SignatureFactory(metaclass=Singleton):
 
         parameters = []
         for parameter in signature_config.parameters:
-            parameters.append(ParameterFactory.create(parameter))
+            parameters.append(ParameterFactory.create(parameter, signature_config.container_modality, container_encoding))
 
         # Currently not defined by users, defined for completeness
         transforms = []
