@@ -40,7 +40,7 @@ class TestModelUpload:
         text_input_parameter = ParameterConfig(
             parameter_name="raw_text",
             channel_modality=DataModality.Text,
-            channel_encoding="utf8",
+            channel_encoding="utf-8",
             sample_encoding="u8",
             tensor_encoding="int64",
         )
@@ -58,7 +58,7 @@ class TestModelUpload:
         text_output_parameter = ParameterConfig(
             parameter_name="reverse_text",
             channel_modality=DataModality.Text,
-            channel_encoding="utf8",
+            channel_encoding="utf-8",
             sample_encoding="u8",
             tensor_encoding="int64",
         )
@@ -88,7 +88,7 @@ class TestModelUpload:
         third_tag_config = ModelTagConfig(name="Test")
 
         model_config = ModelProjectionConfig(
-            name="VinciText SDK",
+            name="VinciText50 SDK",
             category="QA Model",
             version=version_config,
             user_tags=[first_tag_config, second_tag_config, third_tag_config]
