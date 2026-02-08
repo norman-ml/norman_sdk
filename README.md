@@ -170,14 +170,14 @@ model_config: dict[str, Any] = {
         "inputs":[
             {
                 "display_title":"Prompt",
-                "data_modality":"Text",
+                "container_modality":"Text",
                 "data_domain":"prompt",
-                "data_encoding":"utf8",
+                "container_encoding":"utf8",
                 "receive_format":"primitive",
                 "parameters":[
                     {
-                        "parameter_name":"prompt",
-                        "data_encoding":"utf8"
+                        "name":"prompt",
+                        "container_encoding":"utf8"
                     }
                 ]
             }
@@ -185,14 +185,14 @@ model_config: dict[str, Any] = {
         "outputs":[
             {
                 "display_title":"Image",
-                "data_modality":"image",
+                "container_modality":"image",
                 "data_domain":"generate_image",
-                "data_encoding":"png",
+                "container_encoding":"png",
                 "receive_format":"File",
                 "parameters":[
                     {
-                        "parameter_name":"images[0]",
-                        "data_encoding":"png"
+                        "name":"images[0]",
+                        "container_encoding":"png"
                     }
                 ]
             }

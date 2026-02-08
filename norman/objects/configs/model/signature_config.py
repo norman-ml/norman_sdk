@@ -23,4 +23,4 @@ class SignatureConfig(BaseModel):
     hidden: Optional[bool] = Field(None, description="If true, this field is hidden from users in graphical clients")
     default_value: Optional[str] = Field(None, description="Fallback value to use when no explicit input is given by the user")
 
-    signature_arguments: Optional[dict[str, str]] = Field(None, description="Additional arguments to control file encoding and serialization")
+    arguments: Optional[dict[str, str]] = Field(None, description="Additional arguments to control file encoding and serialization")

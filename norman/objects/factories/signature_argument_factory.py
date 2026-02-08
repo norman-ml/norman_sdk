@@ -6,11 +6,7 @@ class SignatureArgumentFactory(metaclass=Singleton):
 
     @staticmethod
     def create(argument_config: dict[str, str], container_encoding: str) -> dict[str, str]:
-        signature_arguments = {}
-        if container_encoding in EncodingArguments.Arguments_Map:
-            signature_arguments |= EncodingArguments.Arguments_Map[container_encoding]
-
-        signature_arguments |= argument_config
-        normalized_arguments = {key: str(value) for key, value in signature_arguments.items()}
-
+        # We currently do not have default signature arguments
+        # but we keep the factory for forward compatibility
+        normalized_arguments = {key: str(value) for key, value in argument_config.items()}
         return normalized_arguments

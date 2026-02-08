@@ -14,15 +14,18 @@ class SignatureFactory(metaclass=Singleton):
     @staticmethod
     def create(signature_config: SignatureConfig, signature_type: SignatureType) -> ModelSignature:
         container_modality_name = signature_config.container_modality.lower()
-        if container_modality_name not in EncodingDefaults.Container_Map:
-            raise KeyError("Signature container modality has no default container encodings")
+        if container_modality_name is None:
+            raise ValueError("Signature container modality cannot be None")
+
+        if signature_type not in EncodingCombinations.Combinations_Map:
+            raise KeyError("Signature container modality is not supported")
 
         container_encoding = signature_config.container_encoding
         if container_encoding is None:
-            container_encoding = EncodingDefaults.Container_Map[container_modality_name]
+            if container_modality_name not in EncodingDefaults.Container_Map:
+                raise KeyError("Signature container modality has no default container encodings")
 
-        if container_modality_name not in EncodingCombinations.Combinations_Map:
-            raise KeyError("Signature container data modality is not supported")
+            container_encoding = EncodingDefaults.Container_Map[container_modality_name]
 
         supported_container_encodings = EncodingCombinations.Combinations_Map[container_modality_name]
         if container_encoding not in supported_container_encodings:
@@ -42,7 +45,8 @@ class SignatureFactory(metaclass=Singleton):
 
         # Currently not defined by users, defined for completeness
         transforms = []
-        signature_args = SignatureArgumentFactory.create(signature_config.signature_arguments, signature_config.container_encoding)
+        
+        arguments = SignatureArgumentFactory.create(signature_config.arguments, signature_config.container_encoding)
 
         model_signature = ModelSignature(
             id=signature_config.id,
@@ -59,7 +63,7 @@ class SignatureFactory(metaclass=Singleton):
             default_value=signature_config.default_value,
             parameters=parameters,
             transforms=transforms,
-            signature_args=signature_args
+            arguments=arguments
         )
 
         return model_signature

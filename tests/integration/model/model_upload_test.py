@@ -25,7 +25,7 @@ class TestModelUpload:
         generated_uuid = uuid.uuid1()
         uuid_time = generated_uuid.time
         time_bytes = uuid_time.to_bytes(8, byteorder="big")
-        time_base64 = base64.urlsafe_b64encode(time_bytes).decode("utf-8").rstrip("=")
+        time_base64 = base64.urlsafe_b64encode(time_bytes).decode("utf8").rstrip("=")
 
         file_asset = AssetConfig(
             asset_name="File",
@@ -38,11 +38,11 @@ class TestModelUpload:
         )
 
         text_input_parameter = ParameterConfig(
-            parameter_name="raw_text",
             channel_modality=DataModality.Text,
-            channel_encoding="utf-8",
+            channel_encoding="utf8",
             sample_encoding="u8",
             tensor_encoding="int64",
+            name="raw_text"
         )
 
         text_input_signature = SignatureConfig(
@@ -56,11 +56,11 @@ class TestModelUpload:
         )
 
         text_output_parameter = ParameterConfig(
-            parameter_name="reverse_text",
             channel_modality=DataModality.Text,
-            channel_encoding="utf-8",
+            channel_encoding="utf8",
             sample_encoding="u8",
             tensor_encoding="int64",
+            name="reverse_text"
         )
 
         text_output_signature = SignatureConfig(

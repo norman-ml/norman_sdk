@@ -4,11 +4,19 @@ from norman_utils_external.encoding_defaults import EncodingDefaults
 from norman_utils_external.singleton import Singleton
 
 from norman.objects.configs.model.parameter_config import ParameterConfig
+from norman.objects.factories.parameter_argument_factory import ParameterArgumentFactory
 
 
 class ParameterFactory(metaclass=Singleton):
     @staticmethod
     def create(parameter_config: ParameterConfig, container_modality: str, container_encoding: str) -> ModelParameter:
+        if container_modality is None:
+            raise ValueError("Signature container modality cannot be None")
+
+        if container_encoding is None:
+            raise ValueError("Signature container encoding cannot be None")
+
+
         container_modality_name = container_modality.lower()
         if container_modality_name not in EncodingDefaults.Channel_Map:
             raise KeyError("Signature container modality has no default container encodings")
@@ -50,16 +58,26 @@ class ParameterFactory(metaclass=Singleton):
         if sample_encoding not in supported_channel_encodings:
             raise KeyError("Parameter channel encoding is not supported for the resolved channel modality")
 
+        parameter_arguments = ParameterArgumentFactory.create(
+            parameter_config.arguments,
+            container_modality,
+            container_encoding,
+            parameter_config.channel_modality,
+            parameter_config.channel_encoding,
+            parameter_config.sample_encoding,
+        )
+
         model_parameter = ModelParameter(
             id=parameter_config.id,
             model_id=parameter_config.model_id,
             version_id=parameter_config.version_id,
             signature_id=parameter_config.signature_id,
-            parameter_name=parameter_config.parameter_name,
             channel_modality=parameter_config.channel_modality,
             channel_encoding=channel_encoding,
             sample_encoding=sample_encoding,
-            tensor_encoding=tensor_encoding
+            tensor_encoding=tensor_encoding,
+            name=parameter_config.name,
+            arguments=parameter_arguments
         )
 
         return model_parameter
