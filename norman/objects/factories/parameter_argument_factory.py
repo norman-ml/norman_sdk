@@ -3,34 +3,33 @@ from norman_utils_external.singleton import Singleton
 
 
 class ParameterArgumentFactory(metaclass=Singleton):
-
     @staticmethod
     def create(
             argument_config: dict[str, str],
-            container_modality: str,
-            container_encoding: str,
-            channel_modality: str,
-            channel_encoding: str,
-            sample_encoding: str
+            container_modality_name: str,
+            container_encoding_name: str,
+            channel_modality_name: str,
+            channel_encoding_name: str,
+            sample_encoding_name: str
         ) -> dict[str, str]:
 
         arguments_map = EncodingArguments.Arguments_Map
-        if container_modality not in arguments_map:
+        if container_modality_name not in arguments_map:
             return argument_config
 
-        container_modality_submap = arguments_map[container_modality]
-        if container_encoding not in container_modality_submap:
+        container_modality_submap = arguments_map[container_modality_name]
+        if container_encoding_name not in container_modality_submap:
             return argument_config
 
-        container_encoding_submap = container_modality_submap[container_encoding]
-        if channel_modality not in container_encoding_submap:
+        container_encoding_submap = container_modality_submap[container_encoding_name]
+        if channel_modality_name not in container_encoding_submap:
             return argument_config
 
-        channel_modality_submap = container_encoding_submap[channel_modality]
-        if channel_encoding not in channel_modality_submap:
+        channel_modality_submap = container_encoding_submap[channel_modality_name]
+        if channel_encoding_name not in channel_modality_submap:
             return argument_config
 
-        channel_encoding_submap = channel_modality_submap[channel_encoding]
+        channel_encoding_submap = channel_modality_submap[channel_encoding_name]
 
         arguments = argument_config | channel_encoding_submap
         normalized_arguments = {key: str(value) for key, value in arguments.items()}

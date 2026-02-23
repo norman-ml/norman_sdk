@@ -1,5 +1,5 @@
+from norman_objects.shared.modality.container_modality import ContainerModality
 from norman_objects.shared.models.model_asset import ModelAsset
-from norman_objects.shared.parameters.data_modality import DataModality
 from norman_utils_external.singleton import Singleton
 
 from norman.managers.authentication_manager import AuthenticationManager
@@ -12,9 +12,9 @@ class AssetFactory(metaclass=Singleton):
     @staticmethod
     def create(asset_config: AssetConfig) -> ModelAsset:
         if asset_config.asset_name == "Logo":
-            data_modality = DataModality.Image
+            data_modality = ContainerModality.Image
         elif asset_config.asset_name == "File":
-            data_modality = DataModality.File
+            data_modality = ContainerModality.File
         else:
             raise ValueError("Asset name not supported")
 

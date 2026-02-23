@@ -1,3 +1,5 @@
+from norman_objects.shared.encoding.container_encoding import ContainerEncoding
+from norman_objects.shared.modality.container_modality import ContainerModality
 from norman_objects.shared.model_signatures.http_location import HttpLocation
 from norman_objects.shared.model_signatures.model_signature import ModelSignature
 from norman_objects.shared.model_signatures.signature_type import SignatureType
@@ -13,22 +15,22 @@ from norman.objects.factories.signature_argument_factory import SignatureArgumen
 class SignatureFactory(metaclass=Singleton):
     @staticmethod
     def create(signature_config: SignatureConfig, signature_type: SignatureType) -> ModelSignature:
-        container_modality_name = signature_config.container_modality.lower()
+        container_modality_name = signature_config.container_modality
         if container_modality_name is None:
             raise ValueError("Signature container modality cannot be None")
 
         if signature_type not in EncodingCombinations.Combinations_Map:
             raise KeyError("Signature container modality is not supported")
 
-        container_encoding = signature_config.container_encoding
-        if container_encoding is None:
+        container_encoding_name = signature_config.container_encoding
+        if container_encoding_name is None:
             if container_modality_name not in EncodingDefaults.Container_Map:
                 raise KeyError("Signature container modality has no default container encodings")
 
-            container_encoding = EncodingDefaults.Container_Map[container_modality_name]
+            container_encoding_name = EncodingDefaults.Container_Map[container_modality_name]
 
         supported_container_encodings = EncodingCombinations.Combinations_Map[container_modality_name]
-        if container_encoding not in supported_container_encodings:
+        if container_encoding_name not in supported_container_encodings:
             raise KeyError("Signature container encoding is not supported for the resolved container modality")
 
         http_location = signature_config.http_location
@@ -40,8 +42,9 @@ class SignatureFactory(metaclass=Singleton):
             hidden = False
 
         parameters = []
-        for parameter in signature_config.parameters:
-            parameters.append(ParameterFactory.create(parameter, signature_config.container_modality, container_encoding))
+        for parameter_config in signature_config.parameters:
+            parameter = ParameterFactory.create(parameter_config, container_modality_name, container_encoding_name)
+            parameters.append(parameter)
 
         # Currently not defined by users, defined for completeness
         transforms = []
@@ -53,11 +56,11 @@ class SignatureFactory(metaclass=Singleton):
             model_id=signature_config.model_id,
             version_id=signature_config.version_id,
             signature_type=signature_type,
-            container_modality=signature_config.container_modality,
+            container_modality=ContainerModality(container_modality_name),
             data_domain=signature_config.data_domain,
-            container_encoding=container_encoding,
+            container_encoding=ContainerEncoding(container_encoding_name),
             receive_format=signature_config.receive_format,
-            http_location=http_location,
+            http_location=HttpLocation[http_location],
             hidden=hidden,
             display_title=signature_config.display_title,
             default_value=signature_config.default_value,
