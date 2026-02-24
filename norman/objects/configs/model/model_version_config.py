@@ -27,6 +27,6 @@ class ModelVersionConfig(BaseModel):
 
     dedicated_provisioning: bool = Field(False, description="Whether this version uses dedicated GPU provisioning")
     machine_type: Optional[str] = Field(None, description="GPU machine type for dedicated provisioning (e.g., 't3.medium', 'r5n.large')")
-    capacity: Optional[int] = Field(None, description="Number of GPU units allocated for dedicated provisioning")
+    capacity: Optional[int] = Field(None, description="Number of instances allocated for dedicated provisioning")
 
     http_headers: Optional[Dict[str, str]] = Field(None, description="Optional HTTP headers passed to external models when called over HTTP")
