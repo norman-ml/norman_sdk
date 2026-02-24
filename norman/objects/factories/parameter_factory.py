@@ -15,11 +15,10 @@ class ParameterFactory(metaclass=Singleton):
     @staticmethod
     def create(parameter_config: ParameterConfig, container_modality_name: str, container_encoding_name: str) -> ModelParameter:
         if container_modality_name is None:
-            raise ValueError("Signature container modality cannot be None")
+            raise ValueError("Signature container modality must be resolved by the signature factory")
 
         if container_encoding_name is None:
-            raise ValueError("Signature container encoding cannot be None")
-
+            raise ValueError("Signature container encoding must be resolved by the signature factory")
 
         if container_modality_name not in EncodingDefaults.Channel_Map:
             raise KeyError("Signature container modality has no default container encodings")

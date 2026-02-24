@@ -19,12 +19,12 @@ class SignatureFactory(metaclass=Singleton):
         if container_modality_name is None:
             raise ValueError("Signature container modality cannot be None")
 
-        if signature_type not in EncodingCombinations.Combinations_Map:
+        if container_modality_name not in EncodingCombinations.Combinations_Map:
             raise KeyError("Signature container modality is not supported")
 
         container_encoding_name = signature_config.container_encoding
         if container_encoding_name is None:
-            if container_modality_name not in EncodingDefaults.Container_Map:
+            if container_modality_name not in EncodingDefaults.Container_Map[container_modality_name]:
                 raise KeyError("Signature container modality has no default container encodings")
 
             container_encoding_name = EncodingDefaults.Container_Map[container_modality_name]
