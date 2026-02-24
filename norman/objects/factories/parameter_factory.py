@@ -46,7 +46,7 @@ class ParameterFactory(metaclass=Singleton):
             tensor_encoding_name = default_channel_encodings["tensor"]
 
         if container_modality_name not in EncodingCombinations.Combinations_Map:
-            raise KeyError("Signature container data modality is not supported")
+            raise KeyError("Signature container modality is not supported")
 
         supported_container_encodings = EncodingCombinations.Combinations_Map[container_modality_name]
         if container_encoding_name not in supported_container_encodings:
