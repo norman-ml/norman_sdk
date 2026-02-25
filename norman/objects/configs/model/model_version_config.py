@@ -25,7 +25,7 @@ class ModelVersionConfig(BaseModel):
     url: Optional[str] = Field(None, description="URL pointing to the model, required for external models")
     output_format: Optional[OutputFormat] = Field(None, description="Optional format in which model outputs are returned")
 
-    dedicated_provisioning: bool = Field(False, description="Whether this version uses dedicated GPU provisioning")
+    dedicated_provisioning: Optional[bool] = Field(False, description="Whether this version uses dedicated GPU provisioning")
     machine_type: Optional[str] = Field(None, description="GPU machine type for dedicated provisioning (e.g., 't3.medium', 'r5n.large')")
     capacity: Optional[int] = Field(None, description="Number of instances allocated for dedicated provisioning")
 
