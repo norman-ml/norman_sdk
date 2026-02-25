@@ -40,10 +40,6 @@ class ModelUploadManager:
             model = await self._create_model_in_database(self._authentication_manager.access_token, model)
             await self._upload_assets(self._authentication_manager.access_token, model, validated_model_config)
             await self._wait_for_flags(self._authentication_manager.access_token, model)
-
-            if model.version.dedicated_provisioning:
-                await self._wait_for_provisioning(self._authentication_manager.access_token, model)
-
             return model
 
     async def _create_model_in_database(self, token: Sensitive[str], model: ModelProjection) -> ModelProjection:
@@ -114,6 +110,3 @@ class ModelUploadManager:
         entity_ids.extend([asset.id for asset in model.version.assets])
 
         await self._flag_status_resolver.wait_for_entities(token, entity_ids)
-
-    async def _wait_for_provisioning(self, token: Sensitive[str], model: ModelProjection) -> None:
-        await self._flag_status_resolver.wait_for_entities(token, [model.version.id])

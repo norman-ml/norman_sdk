@@ -45,6 +45,9 @@ class ModelVersionFactory(metaclass=Singleton):
         if dedicated_provisioning is None:
             dedicated_provisioning = False
 
+        machine_type = version_config.machine_type if version_config.machine_type is not None else ""
+        capacity = version_config.capacity if version_config.capacity is not None else 0
+
         inputs = []
         for signature in version_config.inputs:
             created = SignatureFactory.create(signature, SignatureType.Input)
@@ -78,8 +81,8 @@ class ModelVersionFactory(metaclass=Singleton):
             url=url,
             output_format=output_format,
             dedicated_provisioning=dedicated_provisioning,
-            machine_type=version_config.machine_type,
-            capacity=version_config.capacity,
+            machine_type=machine_type,
+            capacity=capacity,
             assets=assets,
             inputs=inputs,
             outputs=outputs,
