@@ -12,8 +12,8 @@ class TagFactory(metaclass=Singleton):
     def create(tag_config: ModelTagConfig) -> ModelTag:
         model_tag = ModelTag(
             id=tag_config.id,
-            model_id=tag_config.model_id,
             account_id=TagFactory.authentication_manager.account_id,
+            model_id=tag_config.model_id,
             name=tag_config.name
         )
 
