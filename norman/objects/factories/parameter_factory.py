@@ -11,12 +11,13 @@ class ParameterFactory(metaclass=Singleton):
     def create(parameter_config: ParameterConfig) -> ModelParam:
         data_modality = ParameterModalityResolver.resolve(parameter_config.data_encoding)
         model_param = ModelParam(
+            id=parameter_config.id,
+            model_id=parameter_config.model_id,
+            version_id=parameter_config.version_id,
+            signature_id=parameter_config.signature_id,
             data_encoding=parameter_config.data_encoding,
             parameter_name=parameter_config.parameter_name,
             data_modality=data_modality
         )
-
-        if parameter_config.id is not None:
-            model_param.id = parameter_config.id
 
         return model_param

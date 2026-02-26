@@ -25,6 +25,7 @@ class ModelProjectionFactory(metaclass=Singleton):
         model_version = ModelVersionFactory.create(model_config.version)
 
         model = ModelProjection(
+            id=model_config.id,
             account_id=ModelProjectionFactory.authentication_manager.account_id,
             name=model_config.name,
             category=category,
@@ -32,8 +33,5 @@ class ModelProjectionFactory(metaclass=Singleton):
             version=model_version,
             user_tags=user_tags
         )
-
-        if model_config.id is not None:
-            model.id = model_config.id
 
         return model

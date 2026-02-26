@@ -11,11 +11,10 @@ class TagFactory(metaclass=Singleton):
     @staticmethod
     def create(tag_config: ModelTagConfig) -> ModelTag:
         model_tag = ModelTag(
+            id=tag_config.id,
+            model_id=tag_config.model_id,
             account_id=TagFactory.authentication_manager.account_id,
             name=tag_config.name
         )
-
-        if tag_config.id is not None:
-            model_tag.id = tag_config.id
 
         return model_tag

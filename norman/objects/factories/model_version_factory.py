@@ -68,12 +68,10 @@ class ModelVersionFactory(metaclass=Singleton):
         if version_config.http_headers is not None:
             http_headers.update(version_config.http_headers)
 
-
-        version_id = version_config.id if version_config.id is not None else "0"
-
         model_version = ModelVersion(
-            id=version_id,
+            id=version_config.id,
             account_id=ModelVersionFactory.authentication_manager.account_id,
+            model_id=version_config.model_id,
             build_status=ModelBuildStatus.InProgress,
             active=True,
             label=version_config.label,

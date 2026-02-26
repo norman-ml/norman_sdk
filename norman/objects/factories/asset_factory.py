@@ -19,12 +19,12 @@ class AssetFactory(metaclass=Singleton):
             raise ValueError("Asset name not supported")
 
         asset = ModelAsset(
+            id=asset_config.asset_id,
             account_id=AssetFactory.authentication_manager.account_id,
+            model_id=asset_config.model_id,
+            version_id=asset_config.version_id,
             asset_name=asset_config.asset_name,
             data_modality=data_modality
         )
-
-        if asset_config.id is not None:
-            asset.id = asset_config.id
 
         return asset
