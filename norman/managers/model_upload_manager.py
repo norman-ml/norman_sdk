@@ -8,6 +8,7 @@ from norman_objects.services.file_pull.requests.asset_download_request import As
 from norman_objects.services.file_push.pairing.socket_asset_pairing_request import SocketAssetPairingRequest
 from norman_objects.shared.models.model_asset import ModelAsset
 from norman_objects.shared.models.model_projection import ModelProjection
+from norman_objects.shared.queries.query_constraints import QueryConstraints
 from norman_objects.shared.security.sensitive import Sensitive
 from norman_utils_external.file_utils import FileUtils
 
@@ -42,10 +43,36 @@ class ModelUploadManager:
             await self._wait_for_flags(self._authentication_manager.access_token, model)
             return model
 
+    async def upgrade_model(self, model_config: dict[str, Any]) -> ModelProjection:
+        await self._authentication_manager.invalidate_access_token()
+        validated_model_config = ModelProjectionConfig.model_validate(model_config)
+        model = ModelProjectionFactory.create(validated_model_config)
+
+        async with self._http_client:
+            existing_model = await self._get_existing_model(self._authentication_manager.access_token, model.name)
+            model.id = existing_model.id
+            model = await self._upgrade_model_in_database(self._authentication_manager.access_token, model)
+            await self._upload_assets(self._authentication_manager.access_token, model, validated_model_config)
+            await self._wait_for_flags(self._authentication_manager.access_token, model)
+            return model
+
     async def _create_model_in_database(self, token: Sensitive[str], model: ModelProjection) -> ModelProjection:
         models = await self._persist_service.models.create_model_projections(token, [model])
         if models is None or len(models) == 0:
             raise RuntimeError("Model creation failed")
+        return models[0]
+
+    async def _get_existing_model(self, token: Sensitive[str], model_name: str) -> ModelProjection:
+        constraints = QueryConstraints.equals("Models", "Name", model_name)
+        models = await self._persist_service.models.get_models(token, constraints)
+        if models is None or len(models) == 0:
+            raise RuntimeError("Model not found")
+        return list(models.values())[0]
+
+    async def _upgrade_model_in_database(self, token: Sensitive[str], model: ModelProjection) -> ModelProjection:
+        models = await self._persist_service.models.upgrade_model_projections(token, [model])
+        if models is None or len(models) == 0:
+            raise RuntimeError("Model upgrade failed")
         return models[0]
 
     async def _upload_assets(self, token: Sensitive[str], model: ModelProjection, model_config: ModelProjectionConfig) -> None:
