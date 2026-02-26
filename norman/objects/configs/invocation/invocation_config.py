@@ -7,6 +7,7 @@ from norman.objects.configs.invocation.invocation_output_config import Invocatio
 
 
 class InvocationConfig(BaseModel):
+    id: Optional[str] = Field(None, description="Optional invocation ID. If not provided, a new UUID will be generated")
     model_name: str = Field(description="Name of the model to invoke")
     inputs: List[InvocationInputConfig] = Field(description="List of invocation input configurations")
     outputs: Optional[List[InvocationOutputConfig]] = Field(default=None, description="Mapping of output names to their formats")

@@ -34,7 +34,10 @@ class SignatureFactory(metaclass=Singleton):
         transforms = []
         signature_args = {}
 
+        signature_id = signature_config.id if signature_config.id is not None else "0"
+
         model_signature = ModelSignature(
+            id=signature_id,
             signature_type=signature_type,
             data_modality=data_modality,
             data_domain=signature_config.data_domain,

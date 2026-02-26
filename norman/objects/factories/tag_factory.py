@@ -15,4 +15,7 @@ class TagFactory(metaclass=Singleton):
             name=tag_config.name
         )
 
+        if tag_config.id is not None:
+            model_tag.id = tag_config.id
+
         return model_tag

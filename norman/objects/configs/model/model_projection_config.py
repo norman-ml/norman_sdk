@@ -7,6 +7,7 @@ from norman.objects.configs.model.model_version_config import ModelVersionConfig
 
 
 class ModelProjectionConfig(BaseModel):
+    id: Optional[str] = Field(None, description="Optional model ID. If not provided, a new UUID will be generated")
     name: str = Field(description="Unique name of the model")
     category: str = Field(description="Category name or identifier for the task the model solves")
 

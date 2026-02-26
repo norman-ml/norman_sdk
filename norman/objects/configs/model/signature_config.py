@@ -8,6 +8,7 @@ from norman.objects.configs.model.parameter_config import ParameterConfig
 
 
 class SignatureConfig(BaseModel):
+    id: Optional[str] = Field(None, description="Optional signature ID. If not provided, a new UUID will be generated")
     display_title: str = Field(description="Human readable name for the model signature")
     data_modality: str = Field(description="Name or identifier describing and categorizing the contents passed to the model signature")
     data_domain: str = Field(description="Subject area for the data passed to the model signature")

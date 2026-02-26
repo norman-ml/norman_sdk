@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 
 
 class AssetConfig(BaseModel):
+    id: Optional[str] = Field(None, description="Optional asset ID. If not provided, a new UUID will be generated")
     asset_name: str = Field(description="Human friendly name for the model asset")
     data: Union[bytes, str, Path] = Field(description="Actual asset payload")
     source: Optional[InputSource] = Field(None, description="Where the data is coming from")

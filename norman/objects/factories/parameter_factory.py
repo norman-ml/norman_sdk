@@ -16,4 +16,7 @@ class ParameterFactory(metaclass=Singleton):
             data_modality=data_modality
         )
 
+        if parameter_config.id is not None:
+            model_param.id = parameter_config.id
+
         return model_param

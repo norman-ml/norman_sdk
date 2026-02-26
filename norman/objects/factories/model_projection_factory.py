@@ -33,4 +33,7 @@ class ModelProjectionFactory(metaclass=Singleton):
             user_tags=user_tags
         )
 
+        if model_config.id is not None:
+            model.id = model_config.id
+
         return model

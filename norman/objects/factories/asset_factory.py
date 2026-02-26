@@ -24,4 +24,7 @@ class AssetFactory(metaclass=Singleton):
             data_modality=data_modality
         )
 
+        if asset_config.id is not None:
+            asset.id = asset_config.id
+
         return asset
