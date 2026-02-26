@@ -47,7 +47,7 @@ class ModelUploadManager:
         await self._authentication_manager.invalidate_access_token()
         validated_model_config = ModelProjectionConfig.model_validate(model_config)
         model = ModelProjectionFactory.create(validated_model_config)
-
+# TODO: add id optional field to each config and factory, then use the same id field here and remove get existing function
         async with self._http_client:
             existing_model = await self._get_existing_model(self._authentication_manager.access_token, model.name)
             model.id = existing_model.id
