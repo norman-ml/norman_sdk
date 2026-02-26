@@ -92,8 +92,6 @@ class TestModelUpload:
         norman = Norman(api_key)
         model = await norman.upload_model(raw_model_config)
 
-        print(model.model_dump())
-
     @pytest.mark.models
     async def test_upgrade_model(self, api_key: str) -> None:
         generated_uuid = uuid.uuid1()
@@ -177,8 +175,6 @@ class TestModelUpload:
 
         assert upgraded_model.id == model.id
         assert upgraded_model.version.label == f"Version Bet {time_base64}"
-
-        print(upgraded_model.model_dump())
 
     @pytest.mark.models
     def test_upload_model_configuration(self, authentication_manager: AuthenticationManager) -> None:
