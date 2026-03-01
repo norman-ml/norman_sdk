@@ -5,6 +5,7 @@ from norman_objects.shared.models.model_projection import ModelProjection
 from norman_utils_external.singleton import Singleton
 
 from norman.managers.authentication_manager import AuthenticationManager
+from norman.managers.capacity_manager import CapacityManager
 from norman.managers.invocation_manager import InvocationManager
 from norman.managers.model_upload_manager import ModelUploadManager
 
@@ -14,6 +15,7 @@ class Norman(metaclass=Singleton):
         self._authentication_manager = AuthenticationManager()
         self._authentication_manager.set_api_key(api_key)
 
+        self._capacity_manager = CapacityManager()
         self._invocation_manager = InvocationManager()
         self._model_upload_manager = ModelUploadManager()
 
@@ -26,6 +28,9 @@ class Norman(metaclass=Singleton):
 
     async def upgrade_model(self, model_config: dict[str, Any]) -> ModelProjection:
         return await self._model_upload_manager.upgrade_model(model_config)
+
+    async def get_remaining_capacity(self, model_id: str, version_id: str) -> dict[str, int]:
+        return await self._capacity_manager.get_remaining_capacity(model_id, version_id)
 
     async def invoke(self, invocation_config: dict[str, Any]) -> dict[str, bytes]:
         return await self._invocation_manager.invoke(invocation_config)
