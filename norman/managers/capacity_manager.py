@@ -26,17 +26,16 @@ class CapacityManager:
                 QueryConstraints.equals("Capacity_Usage", "Model_ID", model_id)
                 & QueryConstraints.equals("Capacity_Usage", "Version_ID", version_id)
             )
-            capacity_usage = await self._persist_service.capacity_usage.get_capacity_usage(
-                token=token, constraints=constraints
-            )
 
-        used_by_machine_type = {}
+            capacity_usage = await self._persist_service.capacity_usage.get_capacity_usage(token=token, constraints=constraints)
+
+        usage_by_machine_type = {}
         for usage in capacity_usage:
-            used_by_machine_type[usage.machine_type] = used_by_machine_type.get(usage.machine_type, 0) + usage.capacity
+            usage_by_machine_type[usage.machine_type] = usage_by_machine_type.get(usage.machine_type, 0) + usage.capacity
 
-        remaining = {}
-        for record in account_capacity:
-            used = used_by_machine_type.get(record.machine_type, 0)
-            remaining[record.machine_type] = record.capacity - used
+        remaining_capacity = {}
+        for capacity in account_capacity:
+            used_capacity = usage_by_machine_type.get(capacity.machine_type, 0)
+            remaining_capacity[capacity.machine_type] = capacity.capacity - used_capacity
 
-        return remaining
+        return remaining_capacity
