@@ -18,7 +18,9 @@ class CapacityManager:
         token = self._authentication_manager.access_token
 
         async with self._http_client:
-            account_capacity = await self._authenticate_service.capacity.get_account_capacity(token=token)
+            account_id = self._authentication_manager.account_id
+            account_constraints = QueryConstraints.equals("Account_Capacity", "Account_ID", account_id)
+            account_capacity = await self._authenticate_service.capacity.get_account_capacity(token=token, constraints=account_constraints)
 
             constraints = (
                 QueryConstraints.equals("Capacity_Usage", "Model_ID", model_id)
@@ -33,7 +35,7 @@ class CapacityManager:
             used_by_machine_type[usage.machine_type] = used_by_machine_type.get(usage.machine_type, 0) + usage.capacity
 
         remaining = {}
-        for record in account_capacity.values():
+        for record in account_capacity:
             used = used_by_machine_type.get(record.machine_type, 0)
             remaining[record.machine_type] = record.capacity - used
 
