@@ -1,3 +1,5 @@
+from typing import Any
+
 from norman_core.clients.http_client import HttpClient
 from norman_core.services.authenticate import Authenticate
 from norman_core.services.persist import Persist
@@ -13,7 +15,10 @@ class CapacityManager:
         self._persist_service = Persist()
         self._http_client = HttpClient()
 
-    async def get_remaining_capacity(self, model_id: str, version_id: str) -> dict[str, int]:
+    async def get_remaining_capacity(self, capacity_config: dict[str, Any]) -> dict[str, int]:
+        model_id = capacity_config["model_id"]
+        version_id = capacity_config["version_id"]
+
         await self._authentication_manager.invalidate_access_token()
         token = self._authentication_manager.access_token
 
