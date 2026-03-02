@@ -47,12 +47,12 @@ class CapacityManager:
             return remaining_capacity
 
     async def __get_capacity_and_usage(self, account_id: str):
-        account_constraints = QueryConstraints.equals("Account_Capacity", "Account_ID", account_id)
-        capacity_constraints = QueryConstraints.equals("Capacity_Usage", "Account_ID", account_id)
+        account_capacity_constraints = QueryConstraints.equals("Account_Capacity", "Account_ID", account_id)
+        capacity_usage_constraints = QueryConstraints.equals("Capacity_Usage", "Account_ID", account_id)
 
         account_capacity, capacity_usage = await asyncio.gather(
-            self._authenticate_service.capacity.get_account_capacity(token=self._authentication_manager.access_token, constraints=account_constraints),
-            self._persist_service.capacity_usage.get_capacity_usage(token=self._authentication_manager.access_token, constraints=capacity_constraints)
+            self._authenticate_service.capacity.get_account_capacity(token=self._authentication_manager.access_token, constraints=account_capacity_constraints),
+            self._persist_service.capacity_usage.get_capacity_usage(token=self._authentication_manager.access_token, constraints=capacity_usage_constraints)
         )
 
         return account_capacity, capacity_usage
