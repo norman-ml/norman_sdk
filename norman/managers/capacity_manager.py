@@ -24,7 +24,7 @@ class CapacityManager:
             account_id = self._authentication_manager.account_id
             account_capacity, capacity_usage = await self.__get_capacity_and_usage(account_id)
 
-            return self.calculate_remaining_capacity(account_id, account_capacity, capacity_usage)
+            return self.__calculate_remaining_capacity(account_id, account_capacity, capacity_usage)
 
     async def __get_capacity_and_usage(self, account_id: str):
         account_capacity_constraints = QueryConstraints.equals("Account_Capacity", "Account_ID", account_id)
@@ -37,7 +37,7 @@ class CapacityManager:
 
         return account_capacity, capacity_usage
 
-    def calculate_remaining_capacity(self, account_id, account_capacity, capacity_usage) -> List[CapacityRemaining]:
+    def __calculate_remaining_capacity(self, account_id, account_capacity, capacity_usage) -> List[CapacityRemaining]:
         aggregate_account_capacity = {}
         for capacity in account_capacity:
             if capacity.machine_type not in aggregate_account_capacity:
