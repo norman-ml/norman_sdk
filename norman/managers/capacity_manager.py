@@ -25,23 +25,29 @@ class CapacityManager:
 
             account_capacity, capacity_usage = await self.__get_capacity_and_usage(account_id)
 
-            usage_by_machine_type = {}
+            aggregate_account_capacity = {}
+            for capacity in account_capacity:
+                if capacity.machine_type not in aggregate_account_capacity:
+                    aggregate_account_capacity[capacity.machine_type] = 0
+                aggregate_account_capacity[capacity.machine_type] += capacity.capacity
+
+            aggregate_capacity_usage = {}
             for usage in capacity_usage:
-                if usage.machine_type not in usage_by_machine_type:
-                    usage_by_machine_type[usage.machine_type] = 0
-                usage_by_machine_type[usage.machine_type] += usage.capacity
+                if usage.machine_type not in aggregate_capacity_usage:
+                    aggregate_capacity_usage[usage.machine_type] = 0
+                aggregate_capacity_usage[usage.machine_type] += usage.capacity
 
             remaining_capacity = []
-            for capacity in account_capacity:
-                if capacity.machine_type not in usage_by_machine_type:
+            for machine_type in aggregate_account_capacity:
+                if machine_type not in aggregate_capacity_usage:
                     used_capacity = 0
                 else:
-                    used_capacity = usage_by_machine_type[capacity.machine_type]
+                    used_capacity = aggregate_capacity_usage[machine_type]
 
                 remaining_capacity.append(CapacityRemaining(
                     account_id=account_id,
-                    machine_type=capacity.machine_type,
-                    capacity=capacity.capacity - used_capacity
+                    machine_type=machine_type,
+                    capacity=aggregate_account_capacity[machine_type] - used_capacity
                 ))
 
             return remaining_capacity
