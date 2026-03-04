@@ -11,6 +11,8 @@ from norman.objects.configs.model.signature_config import SignatureConfig
 
 
 class ModelVersionConfig(BaseModel):
+    id: str = Field(default="0", description="Unique identifier of the model version")
+    model_id: str = Field(default="0", description="Unique identifier of the base model")
     label: str = Field(description="Human readable version label (e.g., 'v1.0' or 'beta')")
     short_description: str = Field(description="Concise summary describing what the model does")
     long_description: str = Field(description="Detailed explanation of the model, usage, and behavior")

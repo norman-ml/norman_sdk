@@ -25,6 +25,7 @@ class ModelProjectionFactory(metaclass=Singleton):
         model_version = ModelVersionFactory.create(model_config.version)
 
         model = ModelProjection(
+            id=model_config.id,
             account_id=ModelProjectionFactory.authentication_manager.account_id,
             name=model_config.name,
             category=category,
