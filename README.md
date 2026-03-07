@@ -159,40 +159,38 @@ model_config: dict[str, Any] = {
         """),    
         "assets":[
             {
-                "asset_name":"File",
-                "data":"<path/to/your/file>"
+                "asset_name": "File",
+                "data": "<path/to/your/file>"
             },
             {
-                "asset_name":"Logo",
-                "data":"<path/to/your/file>"
+                "asset_name": "Logo",
+                "data": "<path/to/your/file>"
             }
         ],
         "inputs":[
             {
-                "display_title":"Prompt",
-                "data_modality":"Text",
-                "data_domain":"prompt",
-                "data_encoding":"utf8",
-                "receive_format":"primitive",
-                "parameters":[
+                "display_title": "Prompt",
+                "container_modality": "Text",
+                "data_domain": "prompt",
+                "receive_format": "primitive",
+                "parameters": [
                     {
-                        "parameter_name":"prompt",
-                        "data_encoding":"utf8"
+                        "name":"prompt",
+                        "channel_modality": "Text"
                     }
                 ]
             }
         ],
         "outputs":[
             {
-                "display_title":"Image",
-                "data_modality":"image",
-                "data_domain":"generate_image",
-                "data_encoding":"png",
-                "receive_format":"File",
-                "parameters":[
+                "display_title": "Image",
+                "container_modality": "Image",
+                "data_domain": "generate_image",
+                "receive_format": "File",
+                "parameters": [
                     {
-                        "parameter_name":"images[0]",
-                        "data_encoding":"png"
+                        "name":"images[0]",
+                        "channel_modality": "Image"
                     }
                 ]
             }

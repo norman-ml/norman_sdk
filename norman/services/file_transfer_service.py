@@ -37,7 +37,7 @@ class FileTransferService(metaclass=Singleton):
 
     def normalize_primitive_data(self, data: Any) -> io.BytesIO:
         if isinstance(data, str):
-            return io.BytesIO(data.encode("utf-8"))
+            return io.BytesIO(data.encode("utf8"))
 
         elif isinstance(data, (bytes, bytearray)):
             return io.BytesIO(data)
@@ -46,11 +46,11 @@ class FileTransferService(metaclass=Singleton):
             return data
 
         elif isinstance(data, (int, float)):
-            return io.BytesIO(str(data).encode("utf-8"))
+            return io.BytesIO(str(data).encode("utf8"))
 
         elif isinstance(data, (dict, list)):
             json_str = json.dumps(data)
-            return io.BytesIO(json_str.encode("utf-8"))
+            return io.BytesIO(json_str.encode("utf8"))
 
         else:
             raise ValueError(f"Unsupported data type: {type(data)}. Cannot convert to BytesIO.")

@@ -3,8 +3,9 @@ import os
 import uuid
 
 import pytest
+from norman_objects.shared.modality.channel_modality import ChannelModality
+from norman_objects.shared.modality.container_modality import ContainerModality
 from norman_objects.shared.model_signatures.receive_format import ReceiveFormat
-from norman_objects.shared.parameters.data_modality import DataModality
 
 from norman import Norman
 from norman.managers.authentication_manager import AuthenticationManager
@@ -14,7 +15,8 @@ from norman.objects.configs.model.model_tag_config import ModelTagConfig
 from norman.objects.configs.model.model_version_config import ModelVersionConfig
 from norman.objects.configs.model.parameter_config import ParameterConfig
 from norman.objects.configs.model.signature_config import SignatureConfig
-from tests.conftest import Norman_Test_Root
+from pathlib import Path
+Norman_Test_Root = Path(__file__).resolve().parents[3]
 
 
 @pytest.mark.usefixtures("api_key")
@@ -24,43 +26,49 @@ class TestModelUpload:
         generated_uuid = uuid.uuid1()
         uuid_time = generated_uuid.time
         time_bytes = uuid_time.to_bytes(8, byteorder="big")
-        time_base64 = base64.urlsafe_b64encode(time_bytes).decode("utf-8").rstrip("=")
+        time_base64 = base64.urlsafe_b64encode(time_bytes).decode("utf8").rstrip("=")
 
         file_asset = AssetConfig(
             asset_name="File",
-            data=os.sep.join([str(Norman_Test_Root), "assets", "model_files", "text_qa_model.pt"])
+            data=os.sep.join([str(Norman_Test_Root), "tests", "assets", "model_files", "text_qa_model.pt"])
         )
 
         logo_asset = AssetConfig(
             asset_name="Logo",
-            data=os.sep.join([str(Norman_Test_Root), "assets", "model_logos", "Vincitext_logo.jpg"])
+            data=os.sep.join([str(Norman_Test_Root), "tests", "assets", "model_logos", "Vincitext_logo.jpg"])
         )
 
         text_input_parameter = ParameterConfig(
-            parameter_name="raw_text",
-            data_encoding="utf8",
+            channel_modality=ChannelModality.Text,
+            channel_encoding="utf8",
+            sample_encoding="u8",
+            tensor_encoding="int64",
+            name="raw_text"
         )
 
         text_input_signature = SignatureConfig(
             display_title="Original text",
-            data_modality=DataModality.Text,
+            container_modality=ContainerModality.Text,
             data_domain="prompt",
-            data_encoding="utf8",
+            container_encoding="txt",
             receive_format=ReceiveFormat.File,
 
             parameters=[text_input_parameter]
         )
 
         text_output_parameter = ParameterConfig(
-            parameter_name="reverse_text",
-            data_encoding="utf8",
+            channel_modality=ChannelModality.Text,
+            channel_encoding="utf8",
+            sample_encoding="u8",
+            tensor_encoding="int64",
+            name="reverse_text"
         )
 
         text_output_signature = SignatureConfig(
             display_title="Reversed text",
-            data_modality=DataModality.Text,
+            container_modality=ContainerModality.Text,
             data_domain="llm_slop",
-            data_encoding="utf8",
+            container_encoding="txt",
             receive_format=ReceiveFormat.File,
 
             parameters=[text_output_parameter]
@@ -81,7 +89,7 @@ class TestModelUpload:
         third_tag_config = ModelTagConfig(name="Test")
 
         model_config = ModelProjectionConfig(
-            name="VinciText SDK",
+            name="VinciText50 SDK",
             category="QA Model",
             version=version_config,
             user_tags=[first_tag_config, second_tag_config, third_tag_config]
@@ -110,30 +118,38 @@ class TestModelUpload:
         )
 
         text_input_parameter = ParameterConfig(
-            parameter_name="raw_text",
-            data_encoding="utf8",
+            channel_modality=ChannelModality.Text,
+            channel_encoding="utf8",
+            sample_encoding="u8",
+            tensor_encoding="int64",
+            name="raw_text"
         )
 
         text_input_signature = SignatureConfig(
             display_title="Original text",
-            data_modality=DataModality.Text,
+            container_modality=ContainerModality.Text,
             data_domain="prompt",
-            data_encoding="utf8",
+            container_encoding="txt",
             receive_format=ReceiveFormat.File,
+
             parameters=[text_input_parameter]
         )
 
         text_output_parameter = ParameterConfig(
-            parameter_name="reverse_text",
-            data_encoding="utf8",
+            channel_modality=ChannelModality.Text,
+            channel_encoding="utf8",
+            sample_encoding="u8",
+            tensor_encoding="int64",
+            name="reverse_text"
         )
 
         text_output_signature = SignatureConfig(
             display_title="Reversed text",
-            data_modality=DataModality.Text,
+            container_modality=ContainerModality.Text,
             data_domain="llm_slop",
-            data_encoding="utf8",
+            container_encoding="txt",
             receive_format=ReceiveFormat.File,
+
             parameters=[text_output_parameter]
         )
 
