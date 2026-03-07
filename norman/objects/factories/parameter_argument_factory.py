@@ -1,3 +1,5 @@
+from typing import Optional
+
 from norman_utils_external.encoding_arguments import EncodingArguments
 from norman_utils_external.singleton import Singleton
 
@@ -5,13 +7,16 @@ from norman_utils_external.singleton import Singleton
 class ParameterArgumentFactory(metaclass=Singleton):
     @staticmethod
     def create(
-            argument_config: dict[str, str],
+            argument_config: Optional[dict[str, str]],
             container_modality_name: str,
             container_encoding_name: str,
             channel_modality_name: str,
             channel_encoding_name: str,
             sample_encoding_name: str
         ) -> dict[str, str]:
+
+        if argument_config is None:
+            argument_config = {}
 
         arguments_map = EncodingArguments.Arguments_Map
         if container_modality_name not in arguments_map:

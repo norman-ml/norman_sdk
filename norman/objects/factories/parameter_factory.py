@@ -56,9 +56,13 @@ class ParameterFactory(metaclass=Singleton):
         if channel_modality_name not in supported_channel_modalities:
             raise KeyError("Parameter channel modality is not supported for the resolved container encoding")
 
-        supported_channel_encodings = supported_channel_modalities[channel_encoding_name]
-        if sample_encoding_name not in supported_channel_encodings:
+        supported_channel_encodings = supported_channel_modalities[channel_modality_name]
+        if channel_encoding_name not in supported_channel_encodings:
             raise KeyError("Parameter channel encoding is not supported for the resolved channel modality")
+
+        supported_sample_encodings = supported_channel_encodings[channel_encoding_name]
+        if sample_encoding_name not in supported_sample_encodings:
+            raise KeyError("Parameter sample encoding is not supported for the resolved channel encoding")
 
         parameter_arguments = ParameterArgumentFactory.create(
             parameter_config.arguments,

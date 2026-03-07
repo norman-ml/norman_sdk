@@ -14,3 +14,5 @@ class ParameterConfig(BaseModel):
     channel_encoding: Optional[str] = Field(description="Encoding format expected by the model forward function for this parameter data")
     sample_encoding: Optional[str] = Field(description="Numeric or bit-level representation of each individual sample value")
     tensor_encoding: Optional[str] = Field(description="Tensor data type and representation used internally by the model for this parameter")
+
+    arguments: Optional[dict[str, str]] = Field(None, description="Additional arguments to control file encoding and serialization")
