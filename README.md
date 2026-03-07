@@ -159,40 +159,38 @@ model_config: dict[str, Any] = {
         """),    
         "assets":[
             {
-                "asset_name":"File",
-                "data":"<path/to/your/file>"
+                "asset_name": "File",
+                "data": "<path/to/your/file>"
             },
             {
-                "asset_name":"Logo",
-                "data":"<path/to/your/file>"
+                "asset_name": "Logo",
+                "data": "<path/to/your/file>"
             }
         ],
         "inputs":[
             {
-                "display_title":"Prompt",
-                "container_modality":"Text",
-                "data_domain":"prompt",
-                "container_encoding":"utf8",
-                "receive_format":"primitive",
-                "parameters":[
+                "display_title": "Prompt",
+                "container_modality": "Text",
+                "data_domain": "prompt",
+                "receive_format": "primitive",
+                "parameters": [
                     {
                         "name":"prompt",
-                        "container_encoding":"utf8"
+                        "channel_modality": "Text"
                     }
                 ]
             }
         ],
         "outputs":[
             {
-                "display_title":"Image",
-                "container_modality":"image",
-                "data_domain":"generate_image",
-                "container_encoding":"png",
-                "receive_format":"File",
-                "parameters":[
+                "display_title": "Image",
+                "container_modality": "Image",
+                "data_domain": "generate_image",
+                "receive_format": "File",
+                "parameters": [
                     {
                         "name":"images[0]",
-                        "container_encoding":"png"
+                        "channel_modality": "Image"
                     }
                 ]
             }

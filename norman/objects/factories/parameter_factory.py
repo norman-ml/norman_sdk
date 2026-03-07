@@ -29,8 +29,8 @@ class ParameterFactory(metaclass=Singleton):
 
         default_channel_modalities = default_container_encodings[container_encoding_name]
         channel_modality_name = parameter_config.channel_modality
-        if channel_modality_name not in default_channel_modalities:
-            raise KeyError("Parameter channel modality has no default channel encodings")
+        if channel_modality_name is None:
+            raise ValueError("Parameter channel modality cannot be None")
 
         default_channel_encodings = default_channel_modalities[channel_modality_name]
         channel_encoding_name = parameter_config.channel_encoding
