@@ -9,7 +9,10 @@ description = "Norman SDK"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
-    "norman_core_sdk @ git+https://github.com/norman-ml/norman_core_sdk_python.git",
+    "norman-exceptions",
+    "norman-objects",
+    "norman-utils-external",
+    "norman-core-sdk",
 
     "pyjwt==2.10.1"
 ]
@@ -33,3 +36,10 @@ markers = [
     "models: anything to do with model entities",
     "invocations: anything to do with invocation entities"
 ]
+
+[tool.uv.sources]
+norman-exceptions = { git = "https://github.com/norman-ml/norman_exceptions.git", branch = "main" }
+norman-objects = { git = "https://github.com/norman-ml/norman_objects.git", branch = "main" }
+norman-utils-external = { git = "https://github.com/norman-ml/norman_utils_external.git", branch = "main" }
+norman-core-sdk-python = { git = "https://github.com/norman-ml/norman_core_sdk_python.git", branch = "main" }
+
