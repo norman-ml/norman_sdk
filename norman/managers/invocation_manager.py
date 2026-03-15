@@ -1,4 +1,5 @@
-import os
+import io
+import json
 from typing import Any
 
 from norman_api.clients.http_client import HttpClient
@@ -6,7 +7,6 @@ from norman_api.services.file_pull.file_pull import FilePull
 from norman_api.services.persist import Persist
 from norman_api.services.retrieve.retrieve import Retrieve
 from norman_objects.services.file_pull.requests.input_download_request import InputDownloadRequest
-from norman_objects.services.file_push.pairing.socket_input_pairing_request import SocketInputPairingRequest
 from norman_objects.shared.invocation_signatures.invocation_signature import InvocationSignature
 from norman_objects.shared.invocations.invocation import Invocation
 from norman_objects.shared.security.sensitive import Sensitive
@@ -19,13 +19,12 @@ from norman.objects.factories.invocation_config_factory import InvocationConfigF
 from norman.objects.handlers.response_handler import ResponseHandler
 from norman.resolvers.flag_status_resolver import FlagStatusResolver
 from norman.resolvers.input_source_resolver import InputSourceResolver
-from norman.services.file_transfer_service import FileTransferService
 
 
 class InvocationManager:
     def __init__(self) -> None:
         self._authentication_manager = AuthenticationManager()
-        self._file_transfer_service = FileTransferService()
+        self._file_push_service = FilePush()
         self._file_utils = FileUtils()
         self._flag_status_resolver = FlagStatusResolver()
         self._http_client = HttpClient()
@@ -80,42 +79,41 @@ class InvocationManager:
             raise ValueError(f"Unsupported input source: {source}")
 
     async def _upload_primitive_input(self, token: Sensitive[str], invocation_input: InvocationSignature, data: Any) -> None:
-        byte_buffer = self._file_transfer_service.normalize_primitive_data(data)
-        buffer_size = self._file_utils.get_buffer_size(byte_buffer)
-        pairing_request = SocketInputPairingRequest(
-            invocation_id=invocation_input.invocation_id,
-            input_id=invocation_input.id,
+        file_buffer = self._normalize_primitive_data(data)
+        await self._file_push_service.upload_input(
+            token=token,
             account_id=invocation_input.account_id,
             model_id=invocation_input.model_id,
             version_id=invocation_input.version_id,
-            file_size_in_bytes=buffer_size
+            invocation_id=invocation_input.invocation_id,
+            input_id=invocation_input.id,
+            file_buffer=file_buffer
         )
-
-        await self._file_transfer_service.upload_from_buffer(token, pairing_request, byte_buffer)
 
     async def _upload_file_input(self, token: Sensitive[str], invocation_input: InvocationSignature, path: str) -> None:
-        file_size = os.path.getsize(path)
-        pairing_request = SocketInputPairingRequest(
-            invocation_id=invocation_input.invocation_id,
-            input_id=invocation_input.id,
+        await self._file_push_service.upload_input(
+            token=token,
             account_id=invocation_input.account_id,
             model_id=invocation_input.model_id,
             version_id=invocation_input.version_id,
-            file_size_in_bytes=file_size
+            invocation_id=invocation_input.invocation_id,
+            input_id=invocation_input.id,
+            file_path=path
         )
-        await self._file_transfer_service.upload_file(token, pairing_request, path)
 
     async def _upload_stream_input(self, token: Sensitive[str], invocation_input: InvocationSignature, stream: Any) -> None:
         file_size = self._file_utils.get_buffer_size(stream)
-        pairing_request = SocketInputPairingRequest(
-            invocation_id=invocation_input.invocation_id,
-            input_id=invocation_input.id,
+        buffer = stream.read() if hasattr(stream, 'read') else bytes(stream)
+        await self._file_push_service.upload_input(
+            token=token,
             account_id=invocation_input.account_id,
             model_id=invocation_input.model_id,
             version_id=invocation_input.version_id,
-            file_size_in_bytes=file_size
+            invocation_id=invocation_input.invocation_id,
+            input_id=invocation_input.id,
+            file_buffer=buffer,
+            file_size=file_size
         )
-        await self._file_transfer_service.upload_from_buffer(token, pairing_request, stream)
 
     async def _submit_link_input(self, token: Sensitive[str], invocation_input: InvocationSignature, link: str) -> None:
         download_request = InputDownloadRequest(
@@ -170,3 +168,16 @@ class InvocationManager:
             invocation_results[display_title] = await method()
 
         return invocation_results
+
+    @staticmethod
+    def _normalize_primitive_data(data: Any) -> bytes:
+        if isinstance(data, str):
+            return data.encode("utf8")
+        elif isinstance(data, (bytes, bytearray)):
+            return bytes(data)
+        elif isinstance(data, (int, float)):
+            return str(data).encode("utf8")
+        elif isinstance(data, (dict, list)):
+            return json.dumps(data).encode("utf8")
+        else:
+            raise ValueError(f"Unsupported data type: {type(data)}")

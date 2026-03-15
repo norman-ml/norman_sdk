@@ -1,10 +1,13 @@
 import os
 from typing import Any
 
+from norman_core.clients.http_client import HttpClient
+from norman_core.services.file_pull.file_pull import FilePull
+from norman_core.services.persist import Persist
 from norman_api.clients.http_client import HttpClient
 from norman_api.services.file_pull.file_pull import FilePull
 from norman_api.services.persist import Persist
-from norman_api.services.file_push.file_push_v2 import FilePushV2
+from norman_api.services.file_push.file_push_v2 import FilePush
 
 from norman_objects.services.file_pull.requests.asset_download_request import AssetDownloadRequest
 from norman_objects.shared.models.model_asset import ModelAsset
@@ -19,15 +22,10 @@ from norman.objects.factories.model_projection_factory import ModelProjectionFac
 from norman.resolvers.flag_status_resolver import FlagStatusResolver
 from norman.resolvers.input_source_resolver import InputSourceResolver
 
-# v1 (socket) — kept for reference
-# from norman_objects.services.file_push.pairing.socket_asset_pairing_request import SocketAssetPairingRequest
-# from norman.services.file_transfer_service import FileTransferService
-
-
 class ModelUploadManager:
     def __init__(self) -> None:
         self._authentication_manager = AuthenticationManager()
-        self._file_push_service = FilePushV2()
+        self._file_push_service = FilePush()
         self._file_utils = FileUtils()
         self._flag_status_resolver = FlagStatusResolver()
         self._http_client = HttpClient()
@@ -115,30 +113,6 @@ class ModelUploadManager:
             file_buffer=buffer,
             file_size=file_size
         )
-
-    # --- v1 (socket) implementation — kept for reference ---
-    #
-    # async def _handle_file_asset(self, token, model_asset, path):
-    #     file_size = os.path.getsize(path)
-    #     pairing_request = SocketAssetPairingRequest(
-    #         account_id=model_asset.account_id,
-    #         model_id=model_asset.model_id,
-    #         version_id=model_asset.version_id,
-    #         asset_id=model_asset.id,
-    #         file_size_in_bytes=file_size
-    #     )
-    #     await self._file_transfer_service.upload_file(token, pairing_request, path)
-    #
-    # async def _handle_stream_asset(self, token, model_asset, stream):
-    #     file_size = self._file_utils.get_buffer_size(stream)
-    #     pairing_request = SocketAssetPairingRequest(
-    #         account_id=model_asset.account_id,
-    #         model_id=model_asset.model_id,
-    #         version_id=model_asset.version_id,
-    #         asset_id=model_asset.id,
-    #         file_size_in_bytes=file_size
-    #     )
-    #     await self._file_transfer_service.upload_from_buffer(token, pairing_request, stream)
 
     async def _handle_link_asset(self, token: Sensitive[str], model_asset: ModelAsset, data: str) -> None:
         download_request = AssetDownloadRequest(
