@@ -6,7 +6,7 @@ from norman_core.services.file_pull.file_pull import FilePull
 from norman_core.services.persist import Persist
 from norman_objects.services.file_pull.requests.asset_download_request import AssetDownloadRequest
 from norman_objects.services.file_push.pairing.socket_asset_pairing_request import SocketAssetPairingRequest
-from norman_objects.shared.models.model_asset import ModelAsset
+from norman_objects.shared.assets.model_asset import ModelAsset
 from norman_objects.shared.models.model_projection import ModelProjection
 from norman_objects.shared.security.sensitive import Sensitive
 from norman_utils_external.file_utils import FileUtils

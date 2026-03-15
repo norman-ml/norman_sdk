@@ -16,6 +16,7 @@ from norman.objects.configs.model.model_version_config import ModelVersionConfig
 from norman.objects.configs.model.parameter_config import ParameterConfig
 from norman.objects.configs.model.signature_config import SignatureConfig
 from pathlib import Path
+
 Norman_Test_Root = Path(__file__).resolve().parents[3]
 
 

@@ -1,5 +1,5 @@
+from norman_objects.shared.assets.model_asset import ModelAsset
 from norman_objects.shared.modality.container_modality import ContainerModality
-from norman_objects.shared.models.model_asset import ModelAsset
 from norman_utils_external.singleton import Singleton
 
 from norman.managers.authentication_manager import AuthenticationManager
