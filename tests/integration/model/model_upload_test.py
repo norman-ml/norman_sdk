@@ -3,6 +3,10 @@ import os
 import uuid
 
 import pytest
+from norman_objects.shared.encoding.channel_encoding import ChannelEncoding
+from norman_objects.shared.encoding.container_encoding import ContainerEncoding
+from norman_objects.shared.encoding.sample_encoding import SampleEncoding
+from norman_objects.shared.encoding.tensor_encoding import TensorEncoding
 from norman_objects.shared.modality.channel_modality import ChannelModality
 from norman_objects.shared.modality.container_modality import ContainerModality
 from norman_objects.shared.model_signatures.receive_format import ReceiveFormat
@@ -41,9 +45,9 @@ class TestModelUpload:
 
         text_input_parameter = ParameterConfig(
             channel_modality=ChannelModality.Text,
-            channel_encoding="utf8",
-            sample_encoding="u8",
-            tensor_encoding="int64",
+            channel_encoding=ChannelEncoding.Utf8,
+            sample_encoding=SampleEncoding.U8,
+            tensor_encoding=TensorEncoding.Int64,
             name="raw_text"
         )
 
@@ -51,7 +55,7 @@ class TestModelUpload:
             display_title="Original text",
             container_modality=ContainerModality.Text,
             data_domain="prompt",
-            container_encoding="txt",
+            container_encoding=ContainerEncoding.Txt,
             receive_format=ReceiveFormat.File,
 
             parameters=[text_input_parameter]
@@ -59,9 +63,9 @@ class TestModelUpload:
 
         text_output_parameter = ParameterConfig(
             channel_modality=ChannelModality.Text,
-            channel_encoding="utf8",
-            sample_encoding="u8",
-            tensor_encoding="int64",
+            channel_encoding=ChannelEncoding.Utf8,
+            sample_encoding=SampleEncoding.U8,
+            tensor_encoding=TensorEncoding.Int64,
             name="reverse_text"
         )
 
@@ -69,7 +73,7 @@ class TestModelUpload:
             display_title="Reversed text",
             container_modality=ContainerModality.Text,
             data_domain="llm_slop",
-            container_encoding="txt",
+            container_encoding=ContainerEncoding.Txt,
             receive_format=ReceiveFormat.File,
 
             parameters=[text_output_parameter]
@@ -120,9 +124,9 @@ class TestModelUpload:
 
         text_input_parameter = ParameterConfig(
             channel_modality=ChannelModality.Text,
-            channel_encoding="utf8",
-            sample_encoding="u8",
-            tensor_encoding="int64",
+            channel_encoding=ChannelEncoding.Utf8,
+            sample_encoding=SampleEncoding.U8,
+            tensor_encoding=TensorEncoding.Int64,
             name="raw_text"
         )
 
@@ -130,7 +134,7 @@ class TestModelUpload:
             display_title="Original text",
             container_modality=ContainerModality.Text,
             data_domain="prompt",
-            container_encoding="txt",
+            container_encoding=ContainerEncoding.Txt,
             receive_format=ReceiveFormat.File,
 
             parameters=[text_input_parameter]
@@ -138,9 +142,9 @@ class TestModelUpload:
 
         text_output_parameter = ParameterConfig(
             channel_modality=ChannelModality.Text,
-            channel_encoding="utf8",
-            sample_encoding="u8",
-            tensor_encoding="int64",
+            channel_encoding=ChannelEncoding.Utf8,
+            sample_encoding=SampleEncoding.U8,
+            tensor_encoding=TensorEncoding.Int64,
             name="reverse_text"
         )
 
@@ -148,7 +152,7 @@ class TestModelUpload:
             display_title="Reversed text",
             container_modality=ContainerModality.Text,
             data_domain="llm_slop",
-            container_encoding="txt",
+            container_encoding=ContainerEncoding.Txt,
             receive_format=ReceiveFormat.File,
 
             parameters=[text_output_parameter]
