@@ -5,7 +5,7 @@ from norman_objects.shared.versions.model_hosting_location import ModelHostingLo
 from norman_objects.shared.versions.model_type import ModelType
 from norman_objects.shared.versions.model_version import ModelVersion
 from norman_objects.shared.versions.output_format import OutputFormat
-from norman_utils_external.singleton import Singleton
+from norman_utils.singleton import Singleton
 
 from norman.managers.authentication_manager import AuthenticationManager
 from norman.objects.configs.model.model_version_config import ModelVersionConfig

@@ -11,7 +11,7 @@ requires-python = ">=3.9"
 dependencies = [
     "norman-exceptions",
     "norman-objects",
-    "norman-utils-external",
+    "norman-utils",
     "norman-core-sdk",
 
     "pyjwt==2.10.1"
@@ -41,6 +41,6 @@ markers = [
 override-dependencies = [
     "norman-exceptions @ git+https://github.com/norman-ml/norman_exceptions.git@main",
     "norman-objects @ git+https://github.com/norman-ml/norman_objects.git@main",
-    "norman-utils-external @ git+https://github.com/norman-ml/norman_utils_external.git@main",
+    "norman-utils @ git+https://github.com/norman-ml/norman_utils.git@main",
     "norman-core-sdk @ git+https://github.com/norman-ml/norman_core_sdk_python.git@main"
 ]

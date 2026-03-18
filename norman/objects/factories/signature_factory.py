@@ -3,9 +3,9 @@ from norman_objects.shared.modality.container_modality import ContainerModality
 from norman_objects.shared.model_signatures.http_location import HttpLocation
 from norman_objects.shared.model_signatures.model_signature import ModelSignature
 from norman_objects.shared.model_signatures.signature_type import SignatureType
-from norman_utils_external.encoding_combinations import EncodingCombinations
-from norman_utils_external.encoding_defaults import EncodingDefaults
-from norman_utils_external.singleton import Singleton
+from norman_utils.encoding_combinations import EncodingCombinations
+from norman_utils.encoding_defaults import EncodingDefaults
+from norman_utils.singleton import Singleton
 
 from norman.objects.configs.model.signature_config import SignatureConfig
 from norman.objects.factories.parameter_factory import ParameterFactory

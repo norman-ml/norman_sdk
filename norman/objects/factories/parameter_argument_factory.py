@@ -5,8 +5,8 @@ from norman_objects.shared.encoding.container_encoding import ContainerEncoding
 from norman_objects.shared.encoding.sample_encoding import SampleEncoding
 from norman_objects.shared.modality.channel_modality import ChannelModality
 from norman_objects.shared.modality.container_modality import ContainerModality
-from norman_utils_external.encoding_arguments import EncodingArguments
-from norman_utils_external.singleton import Singleton
+from norman_utils.encoding_arguments import EncodingArguments
+from norman_utils.singleton import Singleton
 
 
 class ParameterArgumentFactory(metaclass=Singleton):

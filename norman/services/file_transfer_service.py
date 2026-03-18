@@ -10,7 +10,7 @@ from norman_objects.services.file_push.checksum.checksum_request import Checksum
 from norman_objects.services.file_push.pairing.socket_asset_pairing_request import SocketAssetPairingRequest
 from norman_objects.services.file_push.pairing.socket_input_pairing_request import SocketInputPairingRequest
 from norman_objects.shared.security.sensitive import Sensitive
-from norman_utils_external.singleton import Singleton
+from norman_utils.singleton import Singleton
 
 
 class FileTransferService(metaclass=Singleton):

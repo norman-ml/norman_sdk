@@ -1,6 +1,6 @@
 from typing import Any
 
-from norman_utils_external.singleton import Singleton
+from norman_utils.singleton import Singleton
 
 from norman.objects.configs.invocation.invocation_config import InvocationConfig
 from norman.resolvers.input_source_resolver import InputSourceResolver

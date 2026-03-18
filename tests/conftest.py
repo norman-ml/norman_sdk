@@ -3,7 +3,7 @@ from typing import AsyncGenerator, Optional
 
 import pytest_asyncio
 from norman_objects.services.authenticate.signup.signup_key_response import SignupKeyResponse
-from norman_utils_external.name_utils import NameUtils
+from norman_utils.name_utils import NameUtils
 
 from norman.managers.authentication_manager import AuthenticationManager
 

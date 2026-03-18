@@ -9,7 +9,7 @@ from norman_objects.services.file_push.pairing.socket_asset_pairing_request impo
 from norman_objects.shared.assets.model_asset import ModelAsset
 from norman_objects.shared.models.model_projection import ModelProjection
 from norman_objects.shared.security.sensitive import Sensitive
-from norman_utils_external.file_utils import FileUtils
+from norman_utils.file_utils import FileUtils
 
 from norman.managers.authentication_manager import AuthenticationManager
 from norman.objects.configs.model.asset_config import AssetConfig

@@ -1,7 +1,7 @@
 import pytest
 from norman_objects.services.authenticate.signup.signup_key_response import SignupKeyResponse
 from norman_objects.shared.security.sensitive import Sensitive
-from norman_utils_external.name_utils import NameUtils
+from norman_utils.name_utils import NameUtils
 
 from norman.managers.authentication_manager import AuthenticationManager
 

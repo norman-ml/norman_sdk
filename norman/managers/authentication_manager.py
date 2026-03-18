@@ -8,8 +8,8 @@ from norman_objects.services.authenticate.login.api_key_login_request import Api
 from norman_objects.services.authenticate.signup.signup_key_request import SignupKeyRequest
 from norman_objects.services.authenticate.signup.signup_key_response import SignupKeyResponse
 from norman_objects.shared.security.sensitive import Sensitive
-from norman_utils_external.key_utils import KeyUtils
-from norman_utils_external.singleton import Singleton
+from norman_utils.key_utils import KeyUtils
+from norman_utils.singleton import Singleton
 
 
 class AuthenticationManager(metaclass=Singleton):

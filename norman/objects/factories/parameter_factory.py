@@ -5,9 +5,9 @@ from norman_objects.shared.encoding.tensor_encoding import TensorEncoding
 from norman_objects.shared.modality.channel_modality import ChannelModality
 from norman_objects.shared.modality.container_modality import ContainerModality
 from norman_objects.shared.parameters.model_parameter import ModelParameter
-from norman_utils_external.encoding_combinations import EncodingCombinations
-from norman_utils_external.encoding_defaults import EncodingDefaults
-from norman_utils_external.singleton import Singleton
+from norman_utils.encoding_combinations import EncodingCombinations
+from norman_utils.encoding_defaults import EncodingDefaults
+from norman_utils.singleton import Singleton
 
 from norman.objects.configs.model.parameter_config import ParameterConfig
 from norman.objects.factories.parameter_argument_factory import ParameterArgumentFactory
