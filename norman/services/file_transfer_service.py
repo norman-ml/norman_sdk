@@ -4,8 +4,8 @@ from pathlib import Path
 from typing import Any, Union
 
 import aiofiles
-from norman_core.clients.socket_client import SocketClient
-from norman_core.services.file_push.file_push import FilePush
+from norman_api.clients.socket_client import SocketClient
+from norman_api.services.file_push.file_push import FilePush
 from norman_objects.services.file_push.checksum.checksum_request import ChecksumRequest
 from norman_objects.services.file_push.pairing.socket_asset_pairing_request import SocketAssetPairingRequest
 from norman_objects.services.file_push.pairing.socket_input_pairing_request import SocketInputPairingRequest
