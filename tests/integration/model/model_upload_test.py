@@ -114,12 +114,12 @@ class TestModelUpload:
 
         file_asset = AssetConfig(
             asset_name="File",
-            data=os.sep.join([str(Norman_Test_Root), "assets", "model_files", "text_qa_model.pt"])
+            data=os.sep.join([str(Norman_Test_Root), "tests", "assets", "model_files", "text_qa_model.pt"])
         )
 
         logo_asset = AssetConfig(
             asset_name="Logo",
-            data=os.sep.join([str(Norman_Test_Root), "assets", "model_logos", "Vincitext_logo.jpg"])
+            data=os.sep.join([str(Norman_Test_Root), "tests", "assets", "model_logos", "Vincitext_logo.jpg"])
         )
 
         text_input_parameter = ParameterConfig(
@@ -168,9 +168,9 @@ class TestModelUpload:
         )
 
         model_config = ModelProjectionConfig(
-            name="VinciText SDK",
+            name=f"VinciText50 SDK {time_base64}",
             category="QA Model",
-            version=version_config,
+            version=version_config
         )
 
         norman = Norman(api_key)
@@ -187,7 +187,7 @@ class TestModelUpload:
 
         upgrade_model_config = ModelProjectionConfig(
             id=model.id,
-            name="VinciText SDK",
+            name=f"VinciText50 SDK {time_base64}",
             category="QA Model",
             version=upgrade_version_config,
         )
