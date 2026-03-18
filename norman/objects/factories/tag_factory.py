@@ -1,5 +1,5 @@
-from norman_objects.shared.models.model_tag import ModelTag
-from norman_utils_external.singleton import Singleton
+from norman_objects.shared.tags.model_tag import ModelTag
+from norman_utils.singleton import Singleton
 
 from norman.managers.authentication_manager import AuthenticationManager
 from norman.objects.configs.model.model_tag_config import ModelTagConfig

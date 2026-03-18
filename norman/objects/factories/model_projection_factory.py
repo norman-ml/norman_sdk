@@ -1,5 +1,5 @@
 from norman_objects.shared.models.model_projection import ModelProjection
-from norman_utils_external.singleton import Singleton
+from norman_utils.singleton import Singleton
 
 from norman.managers.authentication_manager import AuthenticationManager
 from norman.objects.configs.model.model_projection_config import ModelProjectionConfig

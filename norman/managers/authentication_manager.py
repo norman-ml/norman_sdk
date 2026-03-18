@@ -2,14 +2,14 @@ from datetime import datetime, timezone
 from typing import Optional
 
 import jwt
-from norman_core.clients.http_client import HttpClient
-from norman_core.services.authenticate import Authenticate
+from norman_api.clients.http_client import HttpClient
+from norman_api.services.authenticate import Authenticate
 from norman_objects.services.authenticate.login.api_key_login_request import ApiKeyLoginRequest
 from norman_objects.services.authenticate.signup.signup_key_request import SignupKeyRequest
 from norman_objects.services.authenticate.signup.signup_key_response import SignupKeyResponse
 from norman_objects.shared.security.sensitive import Sensitive
-from norman_utils_external.key_utils import KeyUtils
-from norman_utils_external.singleton import Singleton
+from norman_utils.key_utils import KeyUtils
+from norman_utils.singleton import Singleton
 
 
 class AuthenticationManager(metaclass=Singleton):

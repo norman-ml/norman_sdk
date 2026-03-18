@@ -1,11 +1,11 @@
 from norman_objects.shared.model_signatures.signature_type import SignatureType
-from norman_objects.shared.models.http_request_type import HttpRequestType
 from norman_objects.shared.models.model_build_status import ModelBuildStatus
-from norman_objects.shared.models.model_hosting_location import ModelHostingLocation
-from norman_objects.shared.models.model_type import ModelType
-from norman_objects.shared.models.model_version import ModelVersion
-from norman_objects.shared.models.output_format import OutputFormat
-from norman_utils_external.singleton import Singleton
+from norman_objects.shared.versions.http_request_type import HttpRequestType
+from norman_objects.shared.versions.model_hosting_location import ModelHostingLocation
+from norman_objects.shared.versions.model_type import ModelType
+from norman_objects.shared.versions.model_version import ModelVersion
+from norman_objects.shared.versions.output_format import OutputFormat
+from norman_utils.singleton import Singleton
 
 from norman.managers.authentication_manager import AuthenticationManager
 from norman.objects.configs.model.model_version_config import ModelVersionConfig

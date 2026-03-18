@@ -1,15 +1,15 @@
 import os
 from typing import Any
 
-from norman_core.clients.http_client import HttpClient
-from norman_core.services.file_pull.file_pull import FilePull
-from norman_core.services.persist import Persist
+from norman_api.clients.http_client import HttpClient
+from norman_api.services.file_pull.file_pull import FilePull
+from norman_api.services.persist import Persist
 from norman_objects.services.file_pull.requests.asset_download_request import AssetDownloadRequest
 from norman_objects.services.file_push.pairing.socket_asset_pairing_request import SocketAssetPairingRequest
-from norman_objects.shared.models.model_asset import ModelAsset
+from norman_objects.shared.assets.model_asset import ModelAsset
 from norman_objects.shared.models.model_projection import ModelProjection
 from norman_objects.shared.security.sensitive import Sensitive
-from norman_utils_external.file_utils import FileUtils
+from norman_utils.file_utils import FileUtils
 
 from norman.managers.authentication_manager import AuthenticationManager
 from norman.objects.configs.model.asset_config import AssetConfig

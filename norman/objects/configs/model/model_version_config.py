@@ -1,9 +1,9 @@
 from typing import List, Optional, Dict
 
-from norman_objects.shared.models.http_request_type import HttpRequestType
-from norman_objects.shared.models.model_hosting_location import ModelHostingLocation
-from norman_objects.shared.models.model_type import ModelType
-from norman_objects.shared.models.output_format import OutputFormat
+from norman_objects.shared.versions.http_request_type import HttpRequestType
+from norman_objects.shared.versions.model_hosting_location import ModelHostingLocation
+from norman_objects.shared.versions.model_type import ModelType
+from norman_objects.shared.versions.output_format import OutputFormat
 from pydantic import BaseModel, Field
 
 from norman.objects.configs.model.asset_config import AssetConfig

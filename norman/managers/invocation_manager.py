@@ -1,16 +1,16 @@
 import os
 from typing import Any
 
-from norman_core.clients.http_client import HttpClient
-from norman_core.services.file_pull.file_pull import FilePull
-from norman_core.services.persist import Persist
-from norman_core.services.retrieve.retrieve import Retrieve
+from norman_api.clients.http_client import HttpClient
+from norman_api.services.file_pull.file_pull import FilePull
+from norman_api.services.persist import Persist
+from norman_api.services.retrieve.retrieve import Retrieve
 from norman_objects.services.file_pull.requests.input_download_request import InputDownloadRequest
 from norman_objects.services.file_push.pairing.socket_input_pairing_request import SocketInputPairingRequest
 from norman_objects.shared.invocation_signatures.invocation_signature import InvocationSignature
 from norman_objects.shared.invocations.invocation import Invocation
 from norman_objects.shared.security.sensitive import Sensitive
-from norman_utils_external.file_utils import FileUtils
+from norman_utils.file_utils import FileUtils
 
 from norman.managers.authentication_manager import AuthenticationManager
 from norman.objects.configs.invocation.invocation_config import InvocationConfig

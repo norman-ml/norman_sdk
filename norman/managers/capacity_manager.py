@@ -1,9 +1,9 @@
 import asyncio
 from typing import List
 
-from norman_core.clients.http_client import HttpClient
-from norman_core.services.authenticate import Authenticate
-from norman_core.services.persist import Persist
+from norman_api.clients.http_client import HttpClient
+from norman_api.services.authenticate import Authenticate
+from norman_api.services.persist import Persist
 from norman_objects.shared.capacity.capacity_remaining import CapacityRemaining
 from norman_objects.shared.queries.query_constraints import QueryConstraints
 

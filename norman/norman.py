@@ -3,7 +3,7 @@ from typing import Any, List
 from norman_objects.services.authenticate.signup.signup_key_response import SignupKeyResponse
 from norman_objects.shared.capacity.capacity_remaining import CapacityRemaining
 from norman_objects.shared.models.model_projection import ModelProjection
-from norman_utils_external.singleton import Singleton
+from norman_utils.singleton import Singleton
 
 from norman.managers.authentication_manager import AuthenticationManager
 from norman.managers.capacity_manager import CapacityManager
