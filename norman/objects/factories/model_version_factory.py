@@ -24,7 +24,7 @@ class ModelVersionFactory(metaclass=Singleton):
 
         model_type = version_config.model_type
         if model_type is None:
-            model_type = ModelType.Pytorch_jit
+            model_type = ModelType.Pytorch_Script
 
         output_format = version_config.output_format
         if output_format is None:
