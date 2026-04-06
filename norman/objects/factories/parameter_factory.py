@@ -35,19 +35,25 @@ class ParameterFactory(metaclass=Singleton):
             raise ValueError("Parameter channel modality cannot be None")
 
         channel_modality = ChannelModality(channel_modality_name)
-        default_channel_encodings = default_channel_modalities[channel_modality]
+        default_parameter_representation = default_channel_modalities[channel_modality]
 
         channel_encoding_name = parameter_config.channel_encoding
         if channel_encoding_name is None:
-            channel_encoding_name = default_channel_encodings["channel"]
+            channel_encoding = default_parameter_representation.channel_encoding
+        else:
+            channel_encoding = ChannelEncoding(channel_encoding_name)
 
         sample_encoding_name = parameter_config.sample_encoding
         if sample_encoding_name is None:
-            sample_encoding_name = default_channel_encodings["sample"]
+            sample_encoding = default_parameter_representation.sample_encoding
+        else:
+            sample_encoding = SampleEncoding(sample_encoding_name)
 
         tensor_encoding_name = parameter_config.tensor_encoding
         if tensor_encoding_name is None:
-            tensor_encoding_name = default_channel_encodings["tensor"]
+            tensor_encoding = default_parameter_representation.tensor_encoding
+        else:
+            tensor_encoding = TensorEncoding(tensor_encoding_name)
 
         if container_modality not in EncodingCombinations.Combinations_Map:
             raise KeyError("Signature container modality is not supported")
@@ -60,20 +66,13 @@ class ParameterFactory(metaclass=Singleton):
         if channel_modality not in supported_channel_modalities:
             raise KeyError("Parameter channel modality is not supported for the resolved container encoding")
 
-        channel_encoding = ChannelEncoding(channel_encoding_name)
         supported_channel_encodings = supported_channel_modalities[channel_modality]
-
         if channel_encoding not in supported_channel_encodings:
             raise KeyError("Parameter channel encoding is not supported for the resolved channel modality")
 
-        sample_encoding = SampleEncoding(sample_encoding_name)
         supported_sample_encodings = supported_channel_encodings[channel_encoding]
-
         if sample_encoding not in supported_sample_encodings:
             raise KeyError("Parameter sample encoding is not supported for the resolved channel encoding")
-
-
-        tensor_encoding = TensorEncoding(tensor_encoding_name)
 
         parameter_arguments = ParameterArgumentFactory.create(
             parameter_config.arguments,
