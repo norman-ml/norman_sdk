@@ -14,14 +14,14 @@ from norman_utils.singleton import Singleton
 
 class AuthenticationManager(metaclass=Singleton):
     def __init__(self) -> None:
-        self._authentication_service = Authenticate()
-        self._http_client = HttpClient()
+        self.__authentication_service = Authenticate()
+        self.__http_client = HttpClient()
 
-        self._api_key = None
+        self.__api_key = None
         self._account_id = None
         self.__access_token: Optional[Sensitive[str]] = None
-        self._id_token: Optional[Sensitive[str]] = None
-        self._public_key: Optional[str] = None
+        self.__id_token: Optional[Sensitive[str]] = None
+        self.__public_key: Optional[str] = None
 
     @property
     def access_token(self) -> Sensitive[str]:
@@ -34,7 +34,7 @@ class AuthenticationManager(metaclass=Singleton):
         return self._account_id
 
     def set_api_key(self, api_key: str) -> None:
-        self._api_key = api_key
+        self.__api_key = api_key
 
     @staticmethod
     async def signup_and_generate_key(username: str) -> SignupKeyResponse:
@@ -51,26 +51,26 @@ class AuthenticationManager(metaclass=Singleton):
             await self.__login_with_api_key()
 
     async def __fetch_and_cache_public_key(self) -> None:
-        if self._public_key is not None:
+        if self.__public_key is not None:
             return
 
         async with HttpClient():
-            jwks = await self._authentication_service.jwks.get_key_set()
+            jwks = await self.__authentication_service.jwks.get_key_set()
 
         if jwks is not None:
             jwks_dict = jwks.model_dump()
             jwk_list = jwks_dict["key_set"]
-            self._public_key = KeyUtils.jwks_to_public_key(jwk_list)
+            self.__public_key = KeyUtils.jwks_to_public_key(jwk_list)
 
     def access_token_expired(self) -> bool:
         if self.__access_token is None:
             return True
 
         try:
-            if self._public_key is not None:
+            if self.__public_key is not None:
                 decoded = jwt.decode(
                     self.__access_token.value(),
-                    self._public_key,
+                    self.__public_key,
                     algorithms=["RS256"],
                     audience="norman:server"
                 )
@@ -84,21 +84,21 @@ class AuthenticationManager(metaclass=Singleton):
             return True
 
     async def __login_with_api_key(self) -> None:
-        async with self._http_client:
-            if self._api_key is None or self._api_key == "":
+        async with self.__http_client:
+            if self.__api_key is None or self.__api_key == "":
                 raise ValueError("API key is required. Please provide a valid API key")
 
-            login_request = ApiKeyLoginRequest(api_key=Sensitive(self._api_key))
-            login_response = await self._authentication_service.login.login_with_key(login_request)
+            login_request = ApiKeyLoginRequest(api_key=Sensitive(self.__api_key))
+            login_response = await self.__authentication_service.login.login_with_key(login_request)
 
             self._account_id = login_response.account.id
             self.__access_token = login_response.access_token
-            self._id_token = login_response.id_token
+            self.__id_token = login_response.id_token
 
     async def logout(self) -> None:
         if self.__access_token is not None:
             async with HttpClient():
-                await self._authentication_service.logout.logout(self.__access_token)
+                await self.__authentication_service.logout.logout(self.__access_token)
 
                 self.__access_token = None
-                self._id_token = None
+                self.__id_token = None

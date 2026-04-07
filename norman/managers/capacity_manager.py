@@ -12,16 +12,16 @@ from norman.managers.authentication_manager import AuthenticationManager
 
 class CapacityManager:
     def __init__(self) -> None:
-        self._authentication_manager = AuthenticationManager()
-        self._authenticate_service = Authenticate()
-        self._persist_service = Persist()
-        self._http_client = HttpClient()
+        self.__authentication_manager = AuthenticationManager()
+        self.__authenticate_service = Authenticate()
+        self.__persist_service = Persist()
+        self.__http_client = HttpClient()
 
     async def get_remaining_capacity(self) -> List[CapacityRemaining]:
-        await self._authentication_manager.invalidate_access_token()
+        await self.__authentication_manager.invalidate_access_token()
 
-        async with self._http_client:
-            account_id = self._authentication_manager.account_id
+        async with self.__http_client:
+            account_id = self.__authentication_manager.account_id
             account_capacity, capacity_usage = await self.__get_capacity_and_usage(account_id)
 
             return self.__calculate_remaining_capacity(account_id, account_capacity, capacity_usage)
@@ -31,8 +31,8 @@ class CapacityManager:
         capacity_usage_constraints = QueryConstraints.equals("Capacity_Usage", "Account_ID", account_id)
 
         account_capacity, capacity_usage = await asyncio.gather(
-            self._authenticate_service.capacity.get_account_capacity(token=self._authentication_manager.access_token, constraints=account_capacity_constraints),
-            self._persist_service.capacity_usage.get_capacity_usage(token=self._authentication_manager.access_token, constraints=capacity_usage_constraints)
+            self.__authenticate_service.capacity.get_account_capacity(token=self.__authentication_manager.access_token, constraints=account_capacity_constraints),
+            self.__persist_service.capacity_usage.get_capacity_usage(token=self.__authentication_manager.access_token, constraints=capacity_usage_constraints)
         )
 
         return account_capacity, capacity_usage
