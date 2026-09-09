@@ -37,10 +37,8 @@ markers = [
     "invocations: anything to do with invocation entities"
 ]
 
-[tool.uv]
-override-dependencies = [
-    "norman-exceptions @ git+https://github.com/norman-ml/norman_exceptions.git@main",
-    "norman-objects @ git+https://github.com/norman-ml/norman_objects.git@main",
-    "norman-utils @ git+https://github.com/norman-ml/norman_utils.git@main",
-    "norman-api @ git+https://github.com/norman-ml/norman_api_python.git@main"
-]
+[tool.uv.sources]
+norman-exceptions = { path = "../norman_exceptions", editable = true }
+norman-objects = { path = "../norman_objects", editable = true }
+norman-utils = { path = "../norman_utils", editable = true }
+norman-api = { path = "../norman_api_python", editable = true }
